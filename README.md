@@ -6,6 +6,11 @@
 
 An in-app hosted virtual inbox for email channel development, testing, and AI agent email access.
 
+## Screenshots
+
+![Administration UI virtual inbox](https://raw.githubusercontent.com/kentico/xperience-by-kentico-virtual-inbox/main/images/admin-virtual-inbox-preview.jpg)
+![Agent driven virtual inbox MCP server](https://raw.githubusercontent.com/kentico/xperience-by-kentico-virtual-inbox/main/images/vscode-copilot-virtual-inbox-mcp.jpg)
+
 ## Requirements
 
 ### Library Version Matrix
@@ -21,19 +26,69 @@ An in-app hosted virtual inbox for email channel development, testing, and AI ag
 
 ## Package Installation
 
-Add the package to your application using the .NET CLI
+Add these package to your application using the .NET CLI.
+
+The core package adds the integration's object types and custom email client.
+
+```powershell
+dotnet add package Kentico.Xperience.VirtualInbox
+```
+
+The admin project adds the virtual inbox administration UI application to the project.
 
 ```powershell
 dotnet add package Kentico.Xperience.VirtualInbox.Admin
+```
 
+The MCP project adds an MCP server exposing the captured email data to AI agents.
+
+```powershell
 dotnet add package Kentico.Xperience.VirtualInbox.MCP
 ```
 
 ## Quick Start
 
----Minimal steps to get started with the library. Support the steps with helpful screenshots.---
+1. Add the Admin and MCP NuGet packages to your Xperience by Kentico ASP.NET Core application.
+1. Register the integration's services:
 
----You can completely omit this section if the setup is complicated and cannot be realistically condensed into a few steps. Instead, describe everything in detail in _Usage-Guide.md_.---
+   ```csharp
+   // ...
+   builder.Services.AddVirtualInbox(builder.Configuration);
+   builder.Services.AddVirtualInboxMcpServer(builder.Configuration);
+   // ...
+   ```
+
+1. Enable the MCP server in the middleware pipeline:
+
+   ```csharp
+   // ...
+   app.Kentico().MapRoutes();
+
+   app.MapVirtualInboxMcp();
+   // ...
+   ```
+
+1. Configure your MCP server for your AI enabled development tool
+
+   ```json
+   {
+     "servers": {
+       "kentico.docs.mcp": {
+         "type": "http",
+         "url": "https://docs.kentico.com/mcp"
+       },
+       "kentico.virtual-inbox": {
+         "type": "http",
+         "url": "http://localhost:23146/mcp/virtual-inbox"
+       }
+     }
+   }
+   ```
+
+> [!WARNING]
+> If used in a production environment, the MCP server exposes customer data without any authentication. The MCP server feature is **intended for development-environments only**.
+>
+> Use [environment identification extensions](https://docs.kentico.com/documentation/developers-and-admins/configuration/saas-configuration#environment-identification-extension-methods) or [environment specific settings](https://docs.kentico.com/guides/development/deployment/deploy-to-private-cloud#separate-the-app-settings) to disable the MCP server for non-local deployments.
 
 ## Full Instructions
 
