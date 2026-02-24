@@ -6,6 +6,15 @@
 
 An in-app hosted virtual inbox for email channel development, testing, and AI agent email access.
 
+What are some use cases for this integration?
+
+- AI agent validation of email content and rendering after [code changes](https://github.com/kentico/xperience-by-kentico-kenticopilot).
+- AI agent-driven E2E testing of visitor journeys, like [automations](https://docs.kentico.com/x/automation_xp) and [membership experiences](https://docs.kentico.com/x/members_dev_guides).
+- AI agent-driven customer data generation to validate marketing features like activity tracking [for emails](https://docs.kentico.com/x/email_activities_xp) and [custom activities](https://docs.kentico.com/x/xoouCw), [content personalization](https://docs.kentico.com/x/NI3WCQ), and [customer journeys](https://docs.kentico.com/x/customer_journeys_xp).
+- Demo environments that need email "delivery" without delivering to a real inbox.
+- "View this email in your browser" by displaying captured email on a website channel.
+- Maintain a clean [email queue](https://docs.kentico.com/x/KgwcCQ) when you don't have [SMTP delivery support](https://docs.kentico.com/x/JQwcCQ) in your environment.
+
 ## Screenshots
 
 ![Administration UI virtual inbox](https://raw.githubusercontent.com/kentico/xperience-by-kentico-virtual-inbox/main/images/admin-virtual-inbox-preview.jpg)
