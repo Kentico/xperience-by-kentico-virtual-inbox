@@ -3,6 +3,10 @@
     "kentico.docs.mcp": {
       "type": "http",
       "url": "https://docs.kentico.com/mcp"
+    },
+    "kentico.virtual-inbox": {
+      "type": "http",
+      "url": "http://localhost:23146/mcp/virtual-inbox"
     }
   }
 }
