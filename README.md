@@ -54,7 +54,10 @@ dotnet add package Kentico.Xperience.VirtualInbox.MCP
    ```csharp
    // ...
    builder.Services.AddVirtualInbox(builder.Configuration);
-   builder.Services.AddVirtualInboxMcpServer(builder.Configuration);
+   if (env.IsDevelopment())
+   {
+      builder.Services.AddVirtualInboxMcpServer(builder.Configuration);
+   }
    // ...
    ```
 
@@ -64,8 +67,24 @@ dotnet add package Kentico.Xperience.VirtualInbox.MCP
    // ...
    app.Kentico().MapRoutes();
 
-   app.MapVirtualInboxMcp();
+   if (env.IsDevelopment())
+   {
+      app.MapVirtualInboxMcp();
+   }
    // ...
+   ```
+
+1. Update your `appsettings.Development.json` to enable the library features:
+
+   ```json
+    "Kentico": {
+      "VirtualInbox": {
+        "Enabled": true,
+        "Mcp": {
+          "Path": "/mcp/virtual-inbox"
+        }
+      }
+    },
    ```
 
 1. Configure your MCP server for your AI enabled development tool
