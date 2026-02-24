@@ -3,7 +3,8 @@ import { usePageCommand } from '@kentico/xperience-admin-base';
 import { Inbox } from './Inbox';
 import { Preview } from './Preview';
 
-type SimulatedEmailListItemDto = {
+type VirtualEmailListItemDto = {
+  messageId: number;
   messageGuid: string;
   subject: string;
   sender: string;
@@ -12,7 +13,7 @@ type SimulatedEmailListItemDto = {
   status: string;
 };
 
-type SimulatedEmailDetailDto = {
+type VirtualEmailDetailDto = {
   messageGuid: string;
   subject: string;
   sender: string;
@@ -23,20 +24,21 @@ type SimulatedEmailDetailDto = {
   bodyPlainText: string;
 };
 
-type LoadSimulatedEmailDetailCommandParams = {
+type LoadVirtualEmailDetailCommandParams = {
   messageGuid: string;
 };
 
-type RefreshSimulatedEmailsCommandParams = {
+type RefreshVirtualEmailsCommandParams = {
   lastRetrievedUtc?: string;
+  lastRetrievedId?: number;
 };
 
-type DeleteSimulatedEmailCommandParams = {
+type DeleteVirtualEmailCommandParams = {
   messageGuid: string;
 };
 
-interface SimulatedEmailInboxClientProperties {
-  messages: SimulatedEmailListItemDto[];
+interface VirtualEmailInboxClientProperties {
+  messages: VirtualEmailListItemDto[];
   loadMessagesCommandName: string;
   refreshMessagesCommandName: string;
   loadMessageDetailCommandName: string;
@@ -44,22 +46,47 @@ interface SimulatedEmailInboxClientProperties {
 }
 
 export const VirtualInboxTemplate = (
-  props: SimulatedEmailInboxClientProperties,
+  props: VirtualEmailInboxClientProperties,
 ) => {
+  const getMostRecentSentUtc = (items: VirtualEmailListItemDto[]) => {
+    const newest = items.reduce<Date | null>((latest, item) => {
+      const sent = new Date(item.sentUtc);
+
+      if (Number.isNaN(sent.getTime())) {
+        return latest;
+      }
+
+      if (!latest || sent > latest) {
+        return sent;
+      }
+
+      return latest;
+    }, null);
+
+    return newest?.toISOString();
+  };
+
+  const getMostRecentMessageId = (items: VirtualEmailListItemDto[]) => {
+    const ids = items.map((item) => item.messageId);
+
+    if (ids.length === 0) {
+      return undefined;
+    }
+
+    return Math.max(...ids);
+  };
+
   const hasRefreshCommand =
     typeof props.refreshMessagesCommandName === 'string' &&
     props.refreshMessagesCommandName.length > 0;
 
-  const [messages, setMessages] = useState<SimulatedEmailListItemDto[]>(
+  const [messages, setMessages] = useState<VirtualEmailListItemDto[]>(
     props.messages ?? [],
   );
   const [selectedMessage, setSelectedMessage] =
-    useState<SimulatedEmailDetailDto | null>(null);
+    useState<VirtualEmailDetailDto | null>(null);
   const [previewTab, setPreviewTab] = useState<'email' | 'metadata'>('email');
   const [searchTerm, setSearchTerm] = useState('');
-  const [lastRetrievedUtc, setLastRetrievedUtc] = useState<string | undefined>(
-    new Date().toISOString(),
-  );
   const [messagesInProgress, setMessagesInProgress] = useState(false);
   const [detailInProgress, setDetailInProgress] = useState(false);
   const [deleteInProgressGuid, setDeleteInProgressGuid] = useState<
@@ -67,29 +94,27 @@ export const VirtualInboxTemplate = (
   >(null);
 
   const { execute: loadMessageDetail } = usePageCommand<
-    SimulatedEmailDetailDto | null,
-    LoadSimulatedEmailDetailCommandParams
+    VirtualEmailDetailDto | null,
+    LoadVirtualEmailDetailCommandParams
   >(props.loadMessageDetailCommandName, {
     after: (response) => {
       setSelectedMessage(response ?? null);
     },
   });
 
-  const { execute: loadMessages } = usePageCommand<SimulatedEmailListItemDto[]>(
+  const { execute: loadMessages } = usePageCommand<VirtualEmailListItemDto[]>(
     props.loadMessagesCommandName,
     {
       after: (response) => {
-        if (response) {
-          setMessages(response);
-        }
-        setLastRetrievedUtc(new Date().toISOString());
+        const items = response ?? [];
+        setMessages(items);
       },
     },
   );
 
   const { execute: refreshMessages } = usePageCommand<
-    SimulatedEmailListItemDto[],
-    RefreshSimulatedEmailsCommandParams
+    VirtualEmailListItemDto[],
+    RefreshVirtualEmailsCommandParams
   >(
     hasRefreshCommand
       ? props.refreshMessagesCommandName
@@ -107,14 +132,13 @@ export const VirtualInboxTemplate = (
             return [...onlyNew, ...previous];
           });
         }
-        setLastRetrievedUtc(new Date().toISOString());
       },
     },
   );
 
   const { execute: deleteMessage } = usePageCommand<
     boolean,
-    DeleteSimulatedEmailCommandParams
+    DeleteVirtualEmailCommandParams
   >(props.deleteMessageCommandName, {
     after: () => undefined,
   });
@@ -136,7 +160,12 @@ export const VirtualInboxTemplate = (
     setMessagesInProgress(true);
     try {
       if (hasRefreshCommand) {
-        await refreshMessages({ lastRetrievedUtc });
+        const mostRecentSentUtc = getMostRecentSentUtc(messages);
+        const mostRecentMessageId = getMostRecentMessageId(messages);
+        await refreshMessages({
+          lastRetrievedId: mostRecentMessageId,
+          lastRetrievedUtc: mostRecentSentUtc,
+        });
       } else {
         await loadMessages();
       }
@@ -201,11 +230,8 @@ export const VirtualInboxTemplate = (
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-4xl font-bold tracking-tight !text-slate-900">
-              Simulated email inbox
+              Virtual email inbox
             </h1>
-            <p className="text-lg !text-slate-600">
-              Emails captured by custom simulated email client.
-            </p>
           </div>
           <button
             className={buttonClassName}
@@ -230,6 +256,7 @@ export const VirtualInboxTemplate = (
           />
           <Preview
             FormatDate={formatDate}
+            OnClose={() => setSelectedMessage(null)}
             SetPreviewTab={setPreviewTab}
             previewTab={previewTab}
             selectedMessage={selectedMessage}

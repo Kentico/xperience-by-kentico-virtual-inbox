@@ -44,7 +44,7 @@ public class VirtualInboxPage(IInfoProvider<VirtualEmailInfo> virtualEmailProvid
 
     [PageCommand(CommandName = REFRESH_MESSAGES_COMMAND, Permission = SystemPermissions.VIEW)]
     public async Task<ICommandResponse> RefreshMessages(RefreshVirtualEmailsCommandParams commandParams) =>
-        ResponseFrom(await LoadMessages(commandParams.LastRetrievedUtc));
+        ResponseFrom(await LoadMessages(commandParams.LastRetrievedUtc, commandParams.LastRetrievedId));
 
     [PageCommand(CommandName = DELETE_MESSAGE_COMMAND, Permission = SystemPermissions.UPDATE)]
     public async Task<ICommandResponse> DeleteMessage(DeleteVirtualEmailCommandParams commandParams)
@@ -65,19 +65,24 @@ public class VirtualInboxPage(IInfoProvider<VirtualEmailInfo> virtualEmailProvid
         return ResponseFrom(true);
     }
 
-    private async Task<List<VirtualEmailListItemDto>> LoadMessages(DateTime? sinceUtc = null)
+    private async Task<List<VirtualEmailListItemDto>> LoadMessages(DateTime? sinceUtc = null, int? sinceId = null)
     {
         var query = virtualEmailProvider.Get();
 
-        if (sinceUtc.HasValue)
+        if (sinceId.HasValue)
         {
-            query = query.WhereGreaterThan(nameof(VirtualEmailInfo.VirtualEmailSentUTCDate), sinceUtc.Value);
+            query = query.WhereGreaterThan(nameof(VirtualEmailInfo.VirtualEmailID), sinceId.Value);
+        }
+        else if (sinceUtc.HasValue)
+        {
+            query = query.WhereGreaterOrEquals(nameof(VirtualEmailInfo.VirtualEmailSentUTCDate), sinceUtc.Value);
         }
 
         var items = (await query
             .OrderByDescending(nameof(VirtualEmailInfo.VirtualEmailSentUTCDate))
             .GetEnumerableTypedResultAsync())
             .Select(item => new VirtualEmailListItemDto(
+                item.VirtualEmailID,
                 item.VirtualEmailGUID,
                 item.VirtualEmailSubject,
                 item.VirtualEmailSender,
@@ -126,6 +131,7 @@ public class VirtualInboxClientProperties : TemplateClientProperties
 }
 
 public record VirtualEmailListItemDto(
+    int MessageId,
     Guid MessageGuid,
     string Subject,
     string Sender,
@@ -145,6 +151,6 @@ public record VirtualEmailDetailDto(
 
 public record LoadVirtualEmailDetailCommandParams(Guid MessageGuid);
 
-public record RefreshVirtualEmailsCommandParams(DateTime? LastRetrievedUtc);
+public record RefreshVirtualEmailsCommandParams(DateTime? LastRetrievedUtc, int? LastRetrievedId);
 
 public record DeleteVirtualEmailCommandParams(Guid MessageGuid);

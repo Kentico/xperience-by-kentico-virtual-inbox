@@ -454,31 +454,6 @@
           "Microsoft.IdentityModel.JsonWebTokens": "8.14.0"
         }
       },
-      "Kentico.Xperience.Core": {
-        "type": "Transitive",
-        "resolved": "31.2.0",
-        "contentHash": "O/9d5n0xZE9bRhRNewC6M+idwpq6o84wA5a+8Eak8nSMT2Tv97LDDrKqIURdKRmugeB4+/xa+rwp/SFqMSTiiQ==",
-        "dependencies": {
-          "AngleSharp": "0.17.1",
-          "Kentico.Aira.Client": "5.1.1",
-          "Magick.NET-Q8-AnyCPU": "14.10.2",
-          "MailKit": "4.14.1",
-          "Microsoft.Data.SqlClient": "5.2.3",
-          "Microsoft.Extensions.Caching.Memory": "8.0.1",
-          "Microsoft.Extensions.Configuration": "8.0.0",
-          "Microsoft.Extensions.DependencyInjection": "8.0.1",
-          "Microsoft.Extensions.FileProviders.Physical": "8.0.0",
-          "Microsoft.Extensions.Hosting.Abstractions": "8.0.1",
-          "Microsoft.Extensions.Localization": "8.0.23",
-          "Microsoft.Extensions.Logging": "8.0.1",
-          "Microsoft.Extensions.Options.ConfigurationExtensions": "8.0.0",
-          "Mono.Cecil": "0.11.6",
-          "Newtonsoft.Json": "13.0.3",
-          "ReverseMarkdown": "5.0.0",
-          "System.CodeDom": "8.0.0",
-          "System.IO.Hashing": "9.0.12"
-        }
-      },
       "Magick.NET-Q8-AnyCPU": {
         "type": "Transitive",
         "resolved": "14.10.2",
@@ -1148,6 +1123,38 @@
         "contentHash": "t16Z+OplJEElJy1Q6t12EwMGF2BeLw8IKjD1ema7ewbCRaMqeVIRPZo3MlxidnRFRK+tV6II8tKYX+7N5ZS98A==",
         "dependencies": {
           "System.IO.Hashing": "8.0.0"
+        }
+      },
+      "kentico.xperience.virtualinbox": {
+        "type": "Project",
+        "dependencies": {
+          "kentico.xperience.core": "[31.2.0, )"
+        }
+      },
+      "Kentico.Xperience.Core": {
+        "type": "CentralTransitive",
+        "requested": "[31.2.0, )",
+        "resolved": "31.2.0",
+        "contentHash": "O/9d5n0xZE9bRhRNewC6M+idwpq6o84wA5a+8Eak8nSMT2Tv97LDDrKqIURdKRmugeB4+/xa+rwp/SFqMSTiiQ==",
+        "dependencies": {
+          "AngleSharp": "0.17.1",
+          "Kentico.Aira.Client": "5.1.1",
+          "Magick.NET-Q8-AnyCPU": "14.10.2",
+          "MailKit": "4.14.1",
+          "Microsoft.Data.SqlClient": "5.2.3",
+          "Microsoft.Extensions.Caching.Memory": "8.0.1",
+          "Microsoft.Extensions.Configuration": "8.0.0",
+          "Microsoft.Extensions.DependencyInjection": "8.0.1",
+          "Microsoft.Extensions.FileProviders.Physical": "8.0.0",
+          "Microsoft.Extensions.Hosting.Abstractions": "8.0.1",
+          "Microsoft.Extensions.Localization": "8.0.23",
+          "Microsoft.Extensions.Logging": "8.0.1",
+          "Microsoft.Extensions.Options.ConfigurationExtensions": "8.0.0",
+          "Mono.Cecil": "0.11.6",
+          "Newtonsoft.Json": "13.0.3",
+          "ReverseMarkdown": "5.0.0",
+          "System.CodeDom": "8.0.0",
+          "System.IO.Hashing": "9.0.12"
         }
       },
       "Kentico.Xperience.WebApp": {

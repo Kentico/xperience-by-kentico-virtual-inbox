@@ -4,6 +4,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Kentico.Xperience.VirtualInbox.Admin/Kentico.Xperience.VirtualInbox.Admin.csproj" />
+    <Project Path="src/Kentico.Xperience.VirtualInbox.MCP/Kentico.Xperience.VirtualInbox.MCP.csproj" />
     <Project Path="src/Kentico.Xperience.VirtualInbox/Kentico.Xperience.VirtualInbox.csproj" />
   </Folder>
   <Folder Name="/tests/">

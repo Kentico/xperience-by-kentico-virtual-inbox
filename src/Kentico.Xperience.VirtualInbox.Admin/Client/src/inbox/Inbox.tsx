@@ -1,12 +1,6 @@
 import React from 'react';
 import { Eye, FileText, RefreshCw, Search, Trash2 } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import {
   Table,
   TableBody,
@@ -40,9 +34,6 @@ export const Inbox = (props: InboxProps) => (
   <Card className="shadow-lg overflow-hidden">
     <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100">
       <CardTitle className="text-2xl !text-slate-900">Inbox</CardTitle>
-      <CardDescription className="text-base !text-slate-600">
-        Stored simulated emails
-      </CardDescription>
       <div className="relative mt-3">
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"

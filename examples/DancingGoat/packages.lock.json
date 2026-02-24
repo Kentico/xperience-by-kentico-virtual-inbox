@@ -497,23 +497,6 @@
           "Microsoft.IdentityModel.JsonWebTokens": "8.14.0"
         }
       },
-      "Kentico.Xperience.Core": {
-        "type": "Transitive",
-        "resolved": "31.2.0",
-        "contentHash": "O/9d5n0xZE9bRhRNewC6M+idwpq6o84wA5a+8Eak8nSMT2Tv97LDDrKqIURdKRmugeB4+/xa+rwp/SFqMSTiiQ==",
-        "dependencies": {
-          "AngleSharp": "0.17.1",
-          "Kentico.Aira.Client": "5.1.1",
-          "Magick.NET-Q8-AnyCPU": "14.10.2",
-          "MailKit": "4.14.1",
-          "Microsoft.Data.SqlClient": "5.2.3",
-          "Mono.Cecil": "0.11.6",
-          "Newtonsoft.Json": "13.0.3",
-          "ReverseMarkdown": "5.0.0",
-          "System.CodeDom": "8.0.0",
-          "System.IO.Hashing": "9.0.12"
-        }
-      },
       "Magick.NET-Q8-AnyCPU": {
         "type": "Transitive",
         "resolved": "14.10.2",
@@ -589,8 +572,8 @@
       },
       "Microsoft.Extensions.AI.Abstractions": {
         "type": "Transitive",
-        "resolved": "10.2.0",
-        "contentHash": "ONGlIBht0ygEdKc0bCt9XWUiq19/460dAu7fCKzPM34OFJSMQIohEDTJwjCJ8vVp8znNakloc9xFF9+R/eDCYQ=="
+        "resolved": "10.3.0",
+        "contentHash": "hDjDvUERvUH3HBMs2MDusOcGJBjAHOG5pJIU2x/HZEa4e1UthNKt89cwMi3B+ogJo6skki1XFjfgGN3ksnVqvQ=="
       },
       "Microsoft.Extensions.AI.OpenAI": {
         "type": "Transitive",
@@ -767,6 +750,14 @@
           "HtmlPerformanceKit": "1.0.0"
         }
       },
+      "ModelContextProtocol.Core": {
+        "type": "Transitive",
+        "resolved": "0.9.0-preview.2",
+        "contentHash": "GYGzcA5s6Ox8rg5Xe9w0kLinAsxvOmg4Yl2T5oAAL4Xhd6ErX1WIewL0I5Zkpmn//QaJbN+adtfonpNCFXbm2A==",
+        "dependencies": {
+          "Microsoft.Extensions.AI.Abstractions": "10.3.0"
+        }
+      },
       "Mono.Cecil": {
         "type": "Transitive",
         "resolved": "0.11.6",
@@ -886,6 +877,63 @@
         "contentHash": "t16Z+OplJEElJy1Q6t12EwMGF2BeLw8IKjD1ema7ewbCRaMqeVIRPZo3MlxidnRFRK+tV6II8tKYX+7N5ZS98A==",
         "dependencies": {
           "System.IO.Hashing": "8.0.0"
+        }
+      },
+      "kentico.xperience.virtualinbox": {
+        "type": "Project",
+        "dependencies": {
+          "kentico.xperience.core": "[31.2.0, )"
+        }
+      },
+      "kentico.xperience.virtualinbox.admin": {
+        "type": "Project",
+        "dependencies": {
+          "Kentico.Xperience.VirtualInbox": "[1.0.0-prerelease-1, )",
+          "kentico.xperience.admin": "[31.2.0, )"
+        }
+      },
+      "kentico.xperience.virtualinbox.mcp": {
+        "type": "Project",
+        "dependencies": {
+          "Kentico.Xperience.VirtualInbox": "[1.0.0-prerelease-1, )",
+          "ModelContextProtocol": "[0.9.0-preview.2, )",
+          "ModelContextProtocol.AspNetCore": "[0.9.0-preview.2, )"
+        }
+      },
+      "Kentico.Xperience.Core": {
+        "type": "CentralTransitive",
+        "requested": "[31.2.0, )",
+        "resolved": "31.2.0",
+        "contentHash": "O/9d5n0xZE9bRhRNewC6M+idwpq6o84wA5a+8Eak8nSMT2Tv97LDDrKqIURdKRmugeB4+/xa+rwp/SFqMSTiiQ==",
+        "dependencies": {
+          "AngleSharp": "0.17.1",
+          "Kentico.Aira.Client": "5.1.1",
+          "Magick.NET-Q8-AnyCPU": "14.10.2",
+          "MailKit": "4.14.1",
+          "Microsoft.Data.SqlClient": "5.2.3",
+          "Mono.Cecil": "0.11.6",
+          "Newtonsoft.Json": "13.0.3",
+          "ReverseMarkdown": "5.0.0",
+          "System.CodeDom": "8.0.0",
+          "System.IO.Hashing": "9.0.12"
+        }
+      },
+      "ModelContextProtocol": {
+        "type": "CentralTransitive",
+        "requested": "[0.9.0-preview.2, )",
+        "resolved": "0.9.0-preview.2",
+        "contentHash": "vMSN6KbH9kfLtogHg3OIJvxTPE7PjWXAl8TQrd8162+Gn4spKBrvAyqkG9nPKlAOgSeX7ioGbOb1zOY4rn2sGA==",
+        "dependencies": {
+          "ModelContextProtocol.Core": "0.9.0-preview.2"
+        }
+      },
+      "ModelContextProtocol.AspNetCore": {
+        "type": "CentralTransitive",
+        "requested": "[0.9.0-preview.2, )",
+        "resolved": "0.9.0-preview.2",
+        "contentHash": "5u7d/oOpGNqZLvdyXBJZ7QAXSIK7ZVJ2VKZN6KNzz8zprbL2MgsD4V7GNltlzWouyOmEIPDr5AmnVZ30FjWSAg==",
+        "dependencies": {
+          "ModelContextProtocol": "0.9.0-preview.2"
         }
       }
     }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 type SimulatedEmailDetailDto = {
@@ -17,12 +18,25 @@ interface PreviewProps {
   previewTab: 'email' | 'metadata';
   FormatDate: (dateString: string) => string;
   SetPreviewTab: (tab: 'email' | 'metadata') => void;
+  OnClose: () => void;
 }
 
 export const Preview = (props: PreviewProps) => (
   <Card className="shadow-lg">
     <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100">
-      <CardTitle className="text-2xl !text-slate-900">Preview</CardTitle>
+      <div className="flex items-center justify-between">
+        <CardTitle className="text-2xl !text-slate-900">Preview</CardTitle>
+        {props.selectedMessage && (
+          <button
+            className="inline-flex items-center justify-center rounded-md h-8 w-8 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900"
+            onClick={props.OnClose}
+            title="Close preview"
+            type="button"
+          >
+            <X size={16} />
+          </button>
+        )}
+      </div>
       {props.selectedMessage && (
         <div className="flex items-center gap-2 mt-3">
           <button
@@ -101,7 +115,7 @@ export const Preview = (props: PreviewProps) => (
 
               <div className="space-y-2">
                 <h3 className="font-semibold !text-slate-900">Plain text</h3>
-                <pre className="p-3 rounded bg-slate-100 text-sm whitespace-pre-wrap">
+                <pre className="p-3 rounded bg-slate-100 text-sm whitespace-pre-wrap !text-slate-900">
                   {props.selectedMessage.bodyPlainText ||
                     '(empty plain text body)'}
                 </pre>

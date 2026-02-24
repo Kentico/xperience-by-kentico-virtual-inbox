@@ -32,6 +32,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Samples.DancingGoat;
+using Kentico.Xperience.VirtualInbox;
+using Kentico.Xperience.VirtualInbox.MCP;
+using CMS.EmailEngine;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +62,8 @@ builder.Services.AddKentico(features =>
 });
 
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
+builder.Services.AddVirtualInbox(builder.Configuration);
+builder.Services.AddVirtualInboxMcpServer(builder.Configuration);
 
 builder.Services.AddLocalization()
     .AddControllersWithViews()
@@ -66,6 +71,11 @@ builder.Services.AddLocalization()
     .AddDataAnnotationsLocalization(options =>
     {
         options.DataAnnotationLocalizerProvider = (type, factory) => factory.Create(typeof(SharedResources));
+    })
+    .Services
+    .Configure<EmailQueueOptions>(options =>
+    {
+        options.ArchiveDuration = 7;
     });
 
 builder.Services.AddDancingGoatServices();
@@ -99,6 +109,7 @@ app.UseAuthorization();
 app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 app.Kentico().MapRoutes();
+app.MapVirtualInboxMcp();
 
 app.MapControllerRoute(
    name: "error",
@@ -124,7 +135,7 @@ app.MapControllerRoute(
     }
 );
 
-app.Run();
+await app.RunAsync();
 
 
 static void ConfigureMembershipServices(IServiceCollection services)
