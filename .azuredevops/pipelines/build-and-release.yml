@@ -34,6 +34,10 @@ stages:
             value: Kentico.Xperience.VirtualInbox.slnx
 
         steps:
+          - task: UseDotNet@2
+            inputs:
+              useGlobalJson: true
+
           - task: PowerShell@2
             displayName: Set Node.js version from package.json
             inputs:
