@@ -1,5 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <Product>Xperience by Kentico Virtual Inbox MCP Server</Product>
+    <Title>$(Product)</Title>
+    <PackageId>Kentico.Xperience.VirtualInbox.MCP</PackageId>
+    <Description>Adds MCP server for Xperience by Kentico Virtual Inbox.</Description>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Kentico.Xperience.VirtualInbox\Kentico.Xperience.VirtualInbox.csproj" />
   </ItemGroup>

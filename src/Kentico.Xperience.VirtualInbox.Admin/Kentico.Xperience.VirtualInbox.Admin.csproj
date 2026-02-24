@@ -1,5 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <Product>Xperience by Kentico Virtual Inbox Administration module</Product>
+    <Title>$(Product)</Title>
+    <PackageId>Kentico.Xperience.VirtualInbox.Admin</PackageId>
+    <Description>Adds Administration application UI for Xperience by Kentico Virtual Inbox.</Description>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <AdminOrgName>kentico</AdminOrgName>
   </PropertyGroup>
 
