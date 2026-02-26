@@ -9,7 +9,7 @@ namespace Kentico.Xperience.VirtualInbox.MCP;
 [McpServerToolType]
 public static class VirtualEmailMcpTools
 {
-    [McpServerTool, Description("Lists Virtual Email records.")]
+    [McpServerTool, Description("Lists Virtual Email records, ordered by send date descending.")]
     public static async Task<IReadOnlyList<VirtualEmailMcpRecord>> ListVirtualEmails(
         IInfoProvider<VirtualEmailInfo> virtualEmailProvider,
         [Description("Maximum number of emails to return (1-200).")]
@@ -37,9 +37,7 @@ public static class VirtualEmailMcpTools
 
         var items = await query.GetEnumerableTypedResultAsync();
 
-        return items
-            .Select(Map)
-            .ToList();
+        return [.. items.Select(Map)];
     }
 
     [McpServerTool, Description("Gets a single Virtual Email by GUID.")]

@@ -55,7 +55,7 @@ The admin project adds the virtual inbox administration UI application to the pr
 dotnet add package Kentico.Xperience.VirtualInbox.Admin
 ```
 
-The MCP project adds an MCP server exposing the captured email data to AI agents.
+The MCP project adds Virtual Inbox MCP tools that you can register on your application's MCP server.
 
 ```powershell
 dotnet add package Kentico.Xperience.VirtualInbox.MCP
@@ -64,14 +64,17 @@ dotnet add package Kentico.Xperience.VirtualInbox.MCP
 ## Quick Start
 
 1. Add the Admin and MCP NuGet packages to your Xperience by Kentico ASP.NET Core application.
-1. Register the integration's services:
+1. Register the integration's services, an MCP server and the integration's MCP tools:
 
    ```csharp
    // ...
-   builder.Services.AddVirtualInbox(builder.Configuration);
+   builder.Services.AddVirtualInboxClient(builder.Configuration); // Adds this library's services
    if (env.IsDevelopment())
    {
-      builder.Services.AddVirtualInboxMcpServer(builder.Configuration);
+      builder.Services
+        .AddMcpServer() // Host application is responsible for adding the McpServer
+        .WithHttpTransport()
+        .WithVirtualInboxTools(); // Adds this library's MCP tools
    }
    // ...
    ```
@@ -84,7 +87,7 @@ dotnet add package Kentico.Xperience.VirtualInbox.MCP
 
    if (env.IsDevelopment())
    {
-      app.MapVirtualInboxMcp();
+      app.MapMcp("/mcp"); // Host application is responsible for adding the endpoint
    }
    // ...
    ```
@@ -95,9 +98,6 @@ dotnet add package Kentico.Xperience.VirtualInbox.MCP
     "Kentico": {
       "VirtualInbox": {
         "Enabled": true,
-        "Mcp": {
-          "Path": "/mcp/virtual-inbox"
-        }
       }
     },
    ```
@@ -113,7 +113,7 @@ dotnet add package Kentico.Xperience.VirtualInbox.MCP
        },
        "kentico.virtual-inbox": {
          "type": "http",
-         "url": "http://localhost:23146/mcp/virtual-inbox"
+         "url": "http://localhost:23146/mcp"
        }
      }
    }

@@ -35,6 +35,7 @@ using Samples.DancingGoat;
 using Kentico.Xperience.VirtualInbox;
 using Kentico.Xperience.VirtualInbox.MCP;
 using CMS.EmailEngine;
+using ModelContextProtocol.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,8 +63,11 @@ builder.Services.AddKentico(features =>
 });
 
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
-builder.Services.AddVirtualInbox(builder.Configuration);
-builder.Services.AddVirtualInboxMcpServer(builder.Configuration);
+builder.Services.AddVirtualInboxClient(builder.Configuration);
+builder.Services
+    .AddMcpServer()
+    .WithHttpTransport()
+    .WithVirtualInboxTools();
 
 builder.Services.AddLocalization()
     .AddControllersWithViews()
@@ -109,7 +113,8 @@ app.UseAuthorization();
 app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 app.Kentico().MapRoutes();
-app.MapVirtualInboxMcp();
+
+app.MapMcp("/mcp");
 
 app.MapControllerRoute(
    name: "error",
