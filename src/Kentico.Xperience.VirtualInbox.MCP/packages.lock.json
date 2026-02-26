@@ -4,22 +4,22 @@
     "net8.0": {
       "ModelContextProtocol": {
         "type": "Direct",
-        "requested": "[0.9.0-preview.2, )",
-        "resolved": "0.9.0-preview.2",
-        "contentHash": "vMSN6KbH9kfLtogHg3OIJvxTPE7PjWXAl8TQrd8162+Gn4spKBrvAyqkG9nPKlAOgSeX7ioGbOb1zOY4rn2sGA==",
+        "requested": "[1.0.0, )",
+        "resolved": "1.0.0",
+        "contentHash": "W7UX8AQ1qMjXyCDcpP25u/L1W2vIIgfhLX/B2ZtTU1VUyILXdmVbdRjkQesKVPT/wPMpYXIHUcZJTPdsGfKSfQ==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Abstractions": "10.0.3",
           "Microsoft.Extensions.Hosting.Abstractions": "10.0.3",
-          "ModelContextProtocol.Core": "0.9.0-preview.2"
+          "ModelContextProtocol.Core": "1.0.0"
         }
       },
       "ModelContextProtocol.AspNetCore": {
         "type": "Direct",
-        "requested": "[0.9.0-preview.2, )",
-        "resolved": "0.9.0-preview.2",
-        "contentHash": "5u7d/oOpGNqZLvdyXBJZ7QAXSIK7ZVJ2VKZN6KNzz8zprbL2MgsD4V7GNltlzWouyOmEIPDr5AmnVZ30FjWSAg==",
+        "requested": "[1.0.0, )",
+        "resolved": "1.0.0",
+        "contentHash": "X0Xtd6TRSiQNWLUQG+9eCo0VkvGwsM9D5P3bB3WJiekawuC7g6PztcDEbNWSZ6hSsP6UrqmOgYfBs/dJFXuJtw==",
         "dependencies": {
-          "ModelContextProtocol": "0.9.0-preview.2"
+          "ModelContextProtocol": "1.0.0"
         }
       },
       "SonarAnalyzer.CSharp": {
@@ -409,8 +409,8 @@
       },
       "ModelContextProtocol.Core": {
         "type": "Transitive",
-        "resolved": "0.9.0-preview.2",
-        "contentHash": "GYGzcA5s6Ox8rg5Xe9w0kLinAsxvOmg4Yl2T5oAAL4Xhd6ErX1WIewL0I5Zkpmn//QaJbN+adtfonpNCFXbm2A==",
+        "resolved": "1.0.0",
+        "contentHash": "QKboiQEq2MJMGeQ029Gy6xqge88abm0Px9lnG7hueOyf+EDCxi5SUATV+Df7GwT+NwWzkEsYG271bUQD+LGhEg==",
         "dependencies": {
           "Microsoft.Extensions.AI.Abstractions": "10.3.0",
           "Microsoft.Extensions.Logging.Abstractions": "10.0.3",
