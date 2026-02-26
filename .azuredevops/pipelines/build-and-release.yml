@@ -43,7 +43,7 @@ stages:
             inputs:
               targetType: inline
               script: |
-                $fileContent = Get-Content -Path 'src/Kentico.Xperience.VirtualInbox/Client/package.json' -Raw
+                $fileContent = Get-Content -Path 'src/Kentico.Xperience.VirtualInbox.Admin/Client/package.json' -Raw
                 $jsonObject = ConvertFrom-Json -InputObject $fileContent
 
                 # Get the value of engines.node
