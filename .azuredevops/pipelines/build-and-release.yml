@@ -31,7 +31,7 @@ stages:
             value: true
 
           - name: slnPath
-            value: Kentico.Xperience.VirtualInbox.slnx
+            value: src/Kentico.Xperience.VirtualInbox.Libs.slnx
 
         steps:
           - task: UseDotNet@2

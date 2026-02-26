@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Kentico.Xperience.VirtualInbox.Admin/Kentico.Xperience.VirtualInbox.Admin.csproj" />
+  <Project Path="Kentico.Xperience.VirtualInbox.MCP/Kentico.Xperience.VirtualInbox.MCP.csproj" />
+  <Project Path="Kentico.Xperience.VirtualInbox/Kentico.Xperience.VirtualInbox.csproj" />
+</Solution>
