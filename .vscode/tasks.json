@@ -7,8 +7,7 @@
       "path": "src/Kentico.Xperience.VirtualInbox.Admin/Client",
       "group": "build",
       "problemMatcher": [],
-      "label": "npm: install - src/Kentico.Xperience.VirtualInbox.Admin/Client",
-      "detail": "install dependencies from package"
+      "label": "npm: install - Admin/Client"
     },
     {
       "type": "dotnet",
@@ -43,25 +42,14 @@
       "path": "src/Kentico.Xperience.VirtualInbox.Admin/Client",
       "group": "build",
       "problemMatcher": [],
-      "label": "npm: build - src/Kentico.Xperience.VirtualInbox.Admin/Client",
-      "detail": "webpack --mode=production"
-    },
-    {
-      "type": "npm",
-      "script": "build:dev",
-      "path": "src/Kentico.Xperience.VirtualInbox.Admin/Client",
-      "group": "build",
-      "problemMatcher": [],
-      "label": "npm: build:dev - src/Kentico.Xperience.VirtualInbox.Admin/Client",
-      "detail": "webpack --mode=development"
+      "label": "npm: build - Admin/Client"
     },
     {
       "type": "npm",
       "script": "start",
       "path": "src/Kentico.Xperience.VirtualInbox.Admin/Client",
       "problemMatcher": [],
-      "label": "npm: start - src/Kentico.Xperience.VirtualInbox.Admin/Client",
-      "detail": "webpack serve --mode development"
+      "label": "npm: watch Admin/Client"
     },
     {
       "label": "dotnet: watch DancingGoat",
