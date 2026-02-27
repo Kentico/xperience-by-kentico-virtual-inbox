@@ -1,10 +1,11 @@
 using CMS.EmailEngine;
 
+using Kentico.Xperience.VirtualInbox;
+
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Kentico.Xperience.VirtualInbox;
+namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Service collection extension methods for Virtual Inbox core and client configuration.

@@ -1,6 +1,7 @@
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Kentico.Xperience.VirtualInbox.MCP;
+using Kentico.Xperience.VirtualInbox.MCP;
+
+namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Extensions for registering Virtual Inbox MCP tools on an existing MCP server builder.
