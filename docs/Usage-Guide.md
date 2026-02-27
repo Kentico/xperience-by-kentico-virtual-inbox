@@ -89,6 +89,25 @@ In `appsettings.Development.json` (or equivalent environment-specific configurat
 }
 ```
 
+### 4) Configure the mcp server in your tool
+
+1. Add your host application's URL and MCP server path (as configured by `app.MapMcp()`) to your AI tool's MCP server config.
+
+   ```json
+   {
+     "servers": {
+       "kentico.docs.mcp": {
+         "type": "http",
+         "url": "https://docs.kentico.com/mcp"
+       },
+       "your-app": {
+         "type": "http",
+         "url": "http://localhost:23146/mcp"
+       }
+     }
+   }
+   ```
+
 ## Why this design matters
 
 Keeping server setup in the host app gives application developers full control over:

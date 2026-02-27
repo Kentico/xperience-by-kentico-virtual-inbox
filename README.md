@@ -111,7 +111,7 @@ dotnet add package Kentico.Xperience.VirtualInbox.MCP
          "type": "http",
          "url": "https://docs.kentico.com/mcp"
        },
-       "kentico.virtual-inbox": {
+       "your-app": {
          "type": "http",
          "url": "http://localhost:23146/mcp"
        }
