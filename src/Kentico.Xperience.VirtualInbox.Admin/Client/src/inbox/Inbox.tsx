@@ -1,6 +1,7 @@
 import React from 'react';
-import { Eye, FileText, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { RefreshCw, Search, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import type { VirtualEmailListItemDto } from './types';
 import {
   Table,
   TableBody,
@@ -10,30 +11,50 @@ import {
   TableRow,
 } from '../ui/table';
 
-interface SimulatedEmailListItemDto {
-  messageGuid: string;
-  subject: string;
-  sender: string;
-  recipientsTo: string;
-  sentUtc: string;
-  status: string;
-}
-
 interface InboxProps {
-  filteredMessages: SimulatedEmailListItemDto[];
+  filteredEmails: VirtualEmailListItemDto[];
+  totalEmailCount: number;
+  selectedEmailGuid: string | null;
+  hasAnyEmails: boolean;
+  hasSelectedEmails: boolean;
+  allFilteredSelected: boolean;
+  selectedEmailGuids: string[];
   searchTerm: string;
   detailInProgress: boolean;
-  deleteInProgressGuid: string | null;
+  bulkDeleteInProgress: boolean;
   FormatDate: (dateString: string) => string;
   OnSearchTermChange: (value: string) => void;
-  OnOpenMessage: (messageGuid: string, tab?: 'email' | 'metadata') => void;
-  OnRemoveMessage: (messageGuid: string) => void;
+  OnOpenEmail: (messageGuid: string) => void;
+  OnDeleteAllOrSelected: () => void;
+  OnToggleEmailSelection: (messageGuid: string, checked: boolean) => void;
+  OnToggleSelectAllFiltered: (checked: boolean) => void;
 }
 
 export const Inbox = (props: InboxProps) => (
-  <Card className="shadow-lg overflow-hidden">
+  <Card className="shadow-lg overflow-hidden h-full min-h-0 flex flex-col">
     <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100">
-      <CardTitle className="text-2xl !text-slate-900">Inbox</CardTitle>
+      <div className="flex items-center justify-between gap-4">
+        <CardTitle className="text-2xl !text-slate-900">
+          Inbox ({props.totalEmailCount})
+        </CardTitle>
+        <button
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900"
+          disabled={props.bulkDeleteInProgress || !props.hasAnyEmails}
+          onClick={props.OnDeleteAllOrSelected}
+          type="button"
+        >
+          {props.bulkDeleteInProgress ? (
+            <RefreshCw className="animate-spin" size={16} />
+          ) : (
+            <Trash2 size={16} />
+          )}
+          {props.bulkDeleteInProgress
+            ? 'Deleting...'
+            : props.hasSelectedEmails
+              ? `Delete selected (${props.selectedEmailGuids.length})`
+              : `Delete all (${props.selectedEmailGuids.length} selected)`}
+        </button>
+      </div>
       <div className="relative mt-3">
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
@@ -42,116 +63,93 @@ export const Inbox = (props: InboxProps) => (
         <input
           className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm !text-slate-900 focus:border-slate-400 focus:outline-none"
           onChange={(event) => props.OnSearchTermChange(event.target.value)}
-          placeholder="Search subject, sender, recipient, status"
+          placeholder="Search subject, sender, recipient"
           type="text"
           value={props.searchTerm}
         />
       </div>
     </CardHeader>
-    <CardContent className="p-0 overflow-auto">
-      <Table>
+    <CardContent className="p-0 flex-1 min-h-0 overflow-y-auto">
+      <Table className="table-fixed">
         <TableHeader>
           <TableRow className="bg-slate-50">
+            <TableHead className="w-10 font-semibold !text-slate-700">
+              <input
+                aria-label="Select all filtered emails"
+                checked={props.allFilteredSelected}
+                className="h-4 w-4 rounded border-slate-300"
+                onChange={(event) =>
+                  props.OnToggleSelectAllFiltered(event.target.checked)
+                }
+                type="checkbox"
+              />
+            </TableHead>
             <TableHead className="font-semibold !text-slate-700">
               Subject
             </TableHead>
             <TableHead className="font-semibold !text-slate-700">
               From
             </TableHead>
-            <TableHead className="font-semibold !text-slate-700">To</TableHead>
+            <TableHead className="w-60 font-semibold !text-slate-700">
+              To
+            </TableHead>
             <TableHead className="font-semibold !text-slate-700">
               Sent
-            </TableHead>
-            <TableHead className="font-semibold !text-slate-700">
-              Status
-            </TableHead>
-            <TableHead className="font-semibold !text-slate-700">
-              Open
-            </TableHead>
-            <TableHead className="font-semibold !text-slate-700">
-              Metadata
-            </TableHead>
-            <TableHead className="font-semibold !text-slate-700">
-              Delete
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {props.filteredMessages.map((message) => (
-            <TableRow key={message.messageGuid}>
+          {props.filteredEmails.map((message) => (
+            <TableRow
+              key={message.messageGuid}
+              aria-selected={props.selectedEmailGuid === message.messageGuid}
+              className={`cursor-pointer hover:bg-slate-50 ${props.selectedEmailGuid === message.messageGuid ? 'bg-sky-100 ring-2 ring-inset ring-sky-300 border-l-4 border-l-sky-500' : ''} ${props.detailInProgress ? 'opacity-70' : ''}`}
+              onClick={() => {
+                if (!props.detailInProgress) {
+                  props.OnOpenEmail(message.messageGuid);
+                }
+              }}
+            >
+              <TableCell>
+                <input
+                  aria-label={`Select email ${message.subject || message.messageGuid}`}
+                  checked={props.selectedEmailGuids.includes(
+                    message.messageGuid,
+                  )}
+                  className="h-4 w-4 rounded border-slate-300"
+                  onClick={(event) => event.stopPropagation()}
+                  onChange={(event) =>
+                    props.OnToggleEmailSelection(
+                      message.messageGuid,
+                      event.target.checked,
+                    )
+                  }
+                  type="checkbox"
+                />
+              </TableCell>
               <TableCell className="!text-slate-900">
                 {message.subject || '(no subject)'}
               </TableCell>
               <TableCell className="!text-slate-700">
                 {message.sender}
               </TableCell>
-              <TableCell className="!text-slate-700">
+              <TableCell className="max-w-[18rem] whitespace-normal break-all !text-slate-700">
                 {message.recipientsTo}
               </TableCell>
               <TableCell className="!text-slate-700">
                 {props.FormatDate(message.sentUtc)}
               </TableCell>
-              <TableCell className="!text-slate-700">
-                {message.status}
-              </TableCell>
-              <TableCell>
-                <button
-                  className="inline-flex items-center justify-center rounded-md h-9 w-9 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900"
-                  disabled={props.detailInProgress}
-                  onClick={() => props.OnOpenMessage(message.messageGuid)}
-                  title="Open email"
-                  type="button"
-                >
-                  {props.detailInProgress ? (
-                    <RefreshCw className="animate-spin" size={16} />
-                  ) : (
-                    <Eye size={16} />
-                  )}
-                </button>
-              </TableCell>
-              <TableCell>
-                <button
-                  className="inline-flex items-center justify-center rounded-md h-9 w-9 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900"
-                  disabled={props.detailInProgress}
-                  onClick={() =>
-                    props.OnOpenMessage(message.messageGuid, 'metadata')
-                  }
-                  title="Open metadata"
-                  type="button"
-                >
-                  {props.detailInProgress ? (
-                    <RefreshCw className="animate-spin" size={16} />
-                  ) : (
-                    <FileText size={16} />
-                  )}
-                </button>
-              </TableCell>
-              <TableCell>
-                <button
-                  className="inline-flex items-center justify-center rounded-md h-9 w-9 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900 disabled:opacity-50"
-                  disabled={props.deleteInProgressGuid === message.messageGuid}
-                  onClick={() => props.OnRemoveMessage(message.messageGuid)}
-                  title="Delete email"
-                  type="button"
-                >
-                  {props.deleteInProgressGuid === message.messageGuid ? (
-                    <RefreshCw className="animate-spin" size={16} />
-                  ) : (
-                    <Trash2 size={16} />
-                  )}
-                </button>
-              </TableCell>
             </TableRow>
           ))}
-          {props.filteredMessages.length === 0 && (
+          {props.filteredEmails.length === 0 && (
             <TableRow>
               <TableCell
                 className="p-8 text-center !text-slate-500"
-                colSpan={8}
+                colSpan={5}
               >
                 {props.searchTerm.trim()
                   ? `No emails match "${props.searchTerm}".`
-                  : 'No simulated emails found.'}
+                  : 'No emails found.'}
               </TableCell>
             </TableRow>
           )}

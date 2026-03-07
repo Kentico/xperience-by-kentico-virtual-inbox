@@ -60,6 +60,12 @@ if (builder.Environment.IsDevelopment())
 }
 ```
 
+`AddVirtualInboxClient(builder.Configuration)` calls `AddVirtualInboxCore()` internally.
+
+- Use `AddVirtualInboxClient(...)` when you want Virtual Inbox to capture outgoing emails based on `Kentico:VirtualInbox:Enabled`.
+- Call `AddVirtualInboxCore()` yourself only when you need the Virtual Inbox data model and administration UI support without replacing the default email client.
+- `AddVirtualInboxCore()` by itself does **not** enable email capture.
+
 ### 2) Map endpoints
 
 Map the MCP endpoint from the host app. The path is chosen by the host app:

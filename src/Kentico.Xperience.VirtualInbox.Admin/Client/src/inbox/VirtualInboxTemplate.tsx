@@ -1,28 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Info } from 'lucide-react';
 import { usePageCommand } from '@kentico/xperience-admin-base';
 import { Inbox } from './Inbox';
 import { Preview } from './Preview';
-
-type VirtualEmailListItemDto = {
-  messageId: number;
-  messageGuid: string;
-  subject: string;
-  sender: string;
-  recipientsTo: string;
-  sentUtc: string;
-  status: string;
-};
-
-type VirtualEmailDetailDto = {
-  messageGuid: string;
-  subject: string;
-  sender: string;
-  recipientsTo: string;
-  sentUtc: string;
-  status: string;
-  bodyHtml: string;
-  bodyPlainText: string;
-};
+import type { VirtualEmailDetailDto, VirtualEmailListItemDto } from './types';
+import { Card, CardContent } from '../ui/card';
 
 type LoadVirtualEmailDetailCommandParams = {
   messageGuid: string;
@@ -33,16 +15,18 @@ type RefreshVirtualEmailsCommandParams = {
   lastRetrievedId?: number;
 };
 
-type DeleteVirtualEmailCommandParams = {
-  messageGuid: string;
+type DeleteVirtualEmailsCommandParams = {
+  messageIds?: number[];
 };
 
 interface VirtualEmailInboxClientProperties {
-  messages: VirtualEmailListItemDto[];
-  loadMessagesCommandName: string;
-  refreshMessagesCommandName: string;
-  loadMessageDetailCommandName: string;
-  deleteMessageCommandName: string;
+  isEnabled: boolean;
+  emails: VirtualEmailListItemDto[];
+  loadEmailsCommandName: string;
+  refreshEmailsCommandName: string;
+  loadEmailDetailCommandName: string;
+  deleteEmailCommandName: string;
+  deleteEmailsCommandName: string;
 }
 
 export const VirtualInboxTemplate = (
@@ -66,7 +50,7 @@ export const VirtualInboxTemplate = (
     return newest?.toISOString();
   };
 
-  const getMostRecentMessageId = (items: VirtualEmailListItemDto[]) => {
+  const getMostRecentEmailId = (items: VirtualEmailListItemDto[]) => {
     const ids = items.map((item) => item.messageId);
 
     if (ids.length === 0) {
@@ -77,52 +61,77 @@ export const VirtualInboxTemplate = (
   };
 
   const hasRefreshCommand =
-    typeof props.refreshMessagesCommandName === 'string' &&
-    props.refreshMessagesCommandName.length > 0;
+    typeof props.refreshEmailsCommandName === 'string' &&
+    props.refreshEmailsCommandName.length > 0;
 
-  const [messages, setMessages] = useState<VirtualEmailListItemDto[]>(
-    props.messages ?? [],
+  const [emails, setEmails] = useState<VirtualEmailListItemDto[]>(
+    props.emails ?? [],
   );
-  const [selectedMessage, setSelectedMessage] =
+  const [selectedEmail, setSelectedEmail] =
     useState<VirtualEmailDetailDto | null>(null);
   const [previewTab, setPreviewTab] = useState<'email' | 'metadata'>('email');
   const [searchTerm, setSearchTerm] = useState('');
-  const [messagesInProgress, setMessagesInProgress] = useState(false);
+  const [emailsInProgress, setEmailsInProgress] = useState(false);
   const [detailInProgress, setDetailInProgress] = useState(false);
-  const [deleteInProgressGuid, setDeleteInProgressGuid] = useState<
-    string | null
-  >(null);
+  const [bulkDeleteInProgress, setBulkDeleteInProgress] = useState(false);
+  const [selectedEmailGuids, setSelectedEmailGuids] = useState<string[]>([]);
+  const [isInfoPopoverOpen, setIsInfoPopoverOpen] = useState(false);
+  const infoPopoverRef = useRef<HTMLDivElement | null>(null);
 
-  const { execute: loadMessageDetail } = usePageCommand<
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      if (!infoPopoverRef.current?.contains(target)) {
+        setIsInfoPopoverOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsInfoPopoverOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
+
+  const { execute: loadEmailDetail } = usePageCommand<
     VirtualEmailDetailDto | null,
     LoadVirtualEmailDetailCommandParams
-  >(props.loadMessageDetailCommandName, {
+  >(props.loadEmailDetailCommandName, {
     after: (response) => {
-      setSelectedMessage(response ?? null);
+      setSelectedEmail(response ?? null);
     },
   });
 
-  const { execute: loadMessages } = usePageCommand<VirtualEmailListItemDto[]>(
-    props.loadMessagesCommandName,
+  const { execute: loadEmails } = usePageCommand<VirtualEmailListItemDto[]>(
+    props.loadEmailsCommandName,
     {
       after: (response) => {
         const items = response ?? [];
-        setMessages(items);
+        setEmails(items);
       },
     },
   );
 
-  const { execute: refreshMessages } = usePageCommand<
+  const { execute: refreshEmails } = usePageCommand<
     VirtualEmailListItemDto[],
     RefreshVirtualEmailsCommandParams
   >(
     hasRefreshCommand
-      ? props.refreshMessagesCommandName
-      : props.loadMessagesCommandName,
+      ? props.refreshEmailsCommandName
+      : props.loadEmailsCommandName,
     {
       after: (response) => {
         if (response && response.length > 0) {
-          setMessages((previous) => {
+          setEmails((previous) => {
             const existingGuids = new Set(
               previous.map((item) => item.messageGuid),
             );
@@ -136,57 +145,121 @@ export const VirtualInboxTemplate = (
     },
   );
 
-  const { execute: deleteMessage } = usePageCommand<
-    boolean,
-    DeleteVirtualEmailCommandParams
-  >(props.deleteMessageCommandName, {
+  const { execute: deleteEmails } = usePageCommand<
+    number,
+    DeleteVirtualEmailsCommandParams
+  >(props.deleteEmailsCommandName, {
     after: () => undefined,
   });
 
-  const openMessage = async (
-    messageGuid: string,
+  const openEmail = async (
+    emailGuid: string,
     tab: 'email' | 'metadata' = 'email',
   ) => {
     setPreviewTab(tab);
     setDetailInProgress(true);
     try {
-      await loadMessageDetail({ messageGuid });
+      await loadEmailDetail({ messageGuid: emailGuid });
     } finally {
       setDetailInProgress(false);
     }
   };
 
   const refreshInbox = async () => {
-    setMessagesInProgress(true);
+    setEmailsInProgress(true);
     try {
       if (hasRefreshCommand) {
-        const mostRecentSentUtc = getMostRecentSentUtc(messages);
-        const mostRecentMessageId = getMostRecentMessageId(messages);
-        await refreshMessages({
-          lastRetrievedId: mostRecentMessageId,
+        const mostRecentSentUtc = getMostRecentSentUtc(emails);
+        const mostRecentEmailId = getMostRecentEmailId(emails);
+        await refreshEmails({
+          lastRetrievedId: mostRecentEmailId,
           lastRetrievedUtc: mostRecentSentUtc,
         });
       } else {
-        await loadMessages();
+        await loadEmails();
       }
     } finally {
-      setMessagesInProgress(false);
+      setEmailsInProgress(false);
     }
   };
 
-  const removeMessage = async (messageGuid: string) => {
-    setDeleteInProgressGuid(messageGuid);
+  const removeAllOrSelectedEmails = async () => {
+    setBulkDeleteInProgress(true);
     try {
-      await deleteMessage({ messageGuid });
-      setMessages((previous) =>
-        previous.filter((item) => item.messageGuid !== messageGuid),
+      const selectedEmailIds = emails
+        .filter((item) => selectedEmailGuids.includes(item.messageGuid))
+        .map((item) => item.messageId);
+
+      await deleteEmails(
+        selectedEmailIds.length > 0 ? { messageIds: selectedEmailIds } : {},
       );
-      setSelectedMessage((previous) =>
-        previous?.messageGuid === messageGuid ? null : previous,
-      );
+
+      if (selectedEmailIds.length > 0) {
+        const selectedSet = new Set(selectedEmailGuids);
+        setEmails((previous) =>
+          previous.filter((item) => !selectedSet.has(item.messageGuid)),
+        );
+        setSelectedEmail((previous) =>
+          previous && selectedSet.has(previous.messageGuid) ? null : previous,
+        );
+      } else {
+        setEmails([]);
+        setSelectedEmail(null);
+      }
+
+      setSelectedEmailGuids([]);
     } finally {
-      setDeleteInProgressGuid(null);
+      setBulkDeleteInProgress(false);
     }
+  };
+
+  const toggleEmailSelection = (emailGuid: string, checked: boolean) => {
+    if (checked) {
+      setSelectedEmailGuids((previous) => {
+        if (previous.includes(emailGuid)) {
+          return previous;
+        }
+
+        return [...previous, emailGuid];
+      });
+
+      return;
+    }
+
+    setSelectedEmailGuids((previous) =>
+      previous.filter((guid) => guid !== emailGuid),
+    );
+  };
+
+  const toggleSelectAllFiltered = (checked: boolean) => {
+    const filteredGuids = emails
+      .filter((message) => {
+        const search = searchTerm.trim().toLowerCase();
+
+        if (!search) {
+          return true;
+        }
+
+        return (
+          message.subject.toLowerCase().includes(search) ||
+          message.sender.toLowerCase().includes(search) ||
+          message.recipientsTo.toLowerCase().includes(search) ||
+          message.status.toLowerCase().includes(search)
+        );
+      })
+      .map((item) => item.messageGuid);
+
+    if (checked) {
+      setSelectedEmailGuids((previous) =>
+        Array.from(new Set([...previous, ...filteredGuids])),
+      );
+
+      return;
+    }
+
+    setSelectedEmailGuids((previous) =>
+      previous.filter((guid) => !filteredGuids.includes(guid)),
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -206,7 +279,7 @@ export const VirtualInboxTemplate = (
     }).format(date);
   };
 
-  const filteredMessages = messages.filter((message) => {
+  const filteredEmails = emails.filter((email) => {
     const search = searchTerm.trim().toLowerCase();
 
     if (!search) {
@@ -214,12 +287,18 @@ export const VirtualInboxTemplate = (
     }
 
     return (
-      message.subject.toLowerCase().includes(search) ||
-      message.sender.toLowerCase().includes(search) ||
-      message.recipientsTo.toLowerCase().includes(search) ||
-      message.status.toLowerCase().includes(search)
+      email.subject.toLowerCase().includes(search) ||
+      email.sender.toLowerCase().includes(search) ||
+      email.recipientsTo.toLowerCase().includes(search) ||
+      email.status.toLowerCase().includes(search)
     );
   });
+
+  const allFilteredSelected =
+    filteredEmails.length > 0 &&
+    filteredEmails.every((item) =>
+      selectedEmailGuids.includes(item.messageGuid),
+    );
 
   const buttonClassName =
     'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900';
@@ -228,40 +307,91 @@ export const VirtualInboxTemplate = (
     <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-slate-50 to-slate-100 p-4 pb-0">
       <div className="w-full h-full space-y-8">
         <div className="flex items-center justify-between mb-4">
-          <div>
+          <div className="flex items-center gap-2">
             <h1 className="text-4xl font-bold tracking-tight !text-slate-900">
               Virtual email inbox
             </h1>
+            <div className="relative" ref={infoPopoverRef}>
+              <button
+                aria-label="Virtual inbox information"
+                aria-expanded={isInfoPopoverOpen}
+                aria-haspopup="dialog"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white !text-slate-700 hover:bg-slate-50"
+                onClick={() => setIsInfoPopoverOpen((value) => !value)}
+                type="button"
+              >
+                <Info size={16} />
+              </button>
+              {isInfoPopoverOpen && (
+                <div className="absolute left-0 top-10 z-20 w-96 rounded-md border border-slate-200 bg-white p-3 text-sm leading-6 !text-slate-700 shadow-lg">
+                  When enabled, the Virtual Inbox captures emails from Xperience
+                  by Kentico&apos;s email queue instead of sending them to
+                  recipients. For more information, visit{' '}
+                  <a
+                    className="font-medium !text-sky-700 underline"
+                    href="https://github.com/Kentico/xperience-by-kentico-virtual-inbox"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Kentico&apos;s GitHub repository
+                  </a>{' '}
+                  for this integration.
+                </div>
+              )}
+            </div>
           </div>
           <button
             className={buttonClassName}
-            disabled={messagesInProgress}
+            disabled={!props.isEnabled || emailsInProgress}
             onClick={() => refreshInbox()}
             type="button"
           >
-            {messagesInProgress ? 'Refreshing...' : 'Refresh'}
+            {emailsInProgress ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:min-h-[calc(100vh-300px)]">
-          <Inbox
-            FormatDate={formatDate}
-            OnOpenMessage={openMessage}
-            OnRemoveMessage={removeMessage}
-            OnSearchTermChange={setSearchTerm}
-            deleteInProgressGuid={deleteInProgressGuid}
-            detailInProgress={detailInProgress}
-            filteredMessages={filteredMessages}
-            searchTerm={searchTerm}
-          />
-          <Preview
-            FormatDate={formatDate}
-            OnClose={() => setSelectedMessage(null)}
-            SetPreviewTab={setPreviewTab}
-            previewTab={previewTab}
-            selectedMessage={selectedMessage}
-          />
-        </div>
+        {!props.isEnabled ? (
+          <Card className="shadow-lg">
+            <CardContent className="p-6">
+              <p className="text-base !text-slate-700">
+                The Virtual Inbox feature is disabled through application
+                settings.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:h-[calc(100vh-300px)] lg:overflow-hidden">
+            <div className="min-h-0">
+              <Inbox
+                FormatDate={formatDate}
+                OnDeleteAllOrSelected={removeAllOrSelectedEmails}
+                OnOpenEmail={openEmail}
+                OnSearchTermChange={setSearchTerm}
+                OnToggleEmailSelection={toggleEmailSelection}
+                OnToggleSelectAllFiltered={toggleSelectAllFiltered}
+                allFilteredSelected={allFilteredSelected}
+                bulkDeleteInProgress={bulkDeleteInProgress}
+                detailInProgress={detailInProgress}
+                filteredEmails={filteredEmails}
+                hasAnyEmails={emails.length > 0}
+                hasSelectedEmails={selectedEmailGuids.length > 0}
+                searchTerm={searchTerm}
+                selectedEmailGuids={selectedEmailGuids}
+                selectedEmailGuid={selectedEmail?.messageGuid ?? null}
+                totalEmailCount={emails.length}
+              />
+            </div>
+            <div className="min-h-0">
+              <Preview
+                FormatDate={formatDate}
+                OnClose={() => setSelectedEmail(null)}
+                SetPreviewTab={setPreviewTab}
+                previewTab={previewTab}
+                selectedEmail={selectedEmail}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

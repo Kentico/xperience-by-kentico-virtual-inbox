@@ -1,20 +1,10 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-
-type SimulatedEmailDetailDto = {
-  messageGuid: string;
-  subject: string;
-  sender: string;
-  recipientsTo: string;
-  sentUtc: string;
-  status: string;
-  bodyHtml: string;
-  bodyPlainText: string;
-};
+import type { VirtualEmailDetailDto } from './types';
 
 interface PreviewProps {
-  selectedMessage: SimulatedEmailDetailDto | null;
+  selectedEmail: VirtualEmailDetailDto | null;
   previewTab: 'email' | 'metadata';
   FormatDate: (dateString: string) => string;
   SetPreviewTab: (tab: 'email' | 'metadata') => void;
@@ -26,7 +16,7 @@ export const Preview = (props: PreviewProps) => (
     <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100">
       <div className="flex items-center justify-between">
         <CardTitle className="text-2xl !text-slate-900">Preview</CardTitle>
-        {props.selectedMessage && (
+        {props.selectedEmail && (
           <button
             className="inline-flex items-center justify-center rounded-md h-8 w-8 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900"
             onClick={props.OnClose}
@@ -37,7 +27,7 @@ export const Preview = (props: PreviewProps) => (
           </button>
         )}
       </div>
-      {props.selectedMessage && (
+      {props.selectedEmail && (
         <div className="flex items-center gap-2 mt-3">
           <button
             className={`inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors h-8 px-3 py-1 border ${
@@ -65,21 +55,21 @@ export const Preview = (props: PreviewProps) => (
       )}
     </CardHeader>
     <CardContent className="pt-6 space-y-4 h-full overflow-auto">
-      {!props.selectedMessage && (
+      {!props.selectedEmail && (
         <p className="text-sm !text-slate-600">
           Select an email from the inbox to view details.
         </p>
       )}
 
-      {props.selectedMessage && (
+      {props.selectedEmail && (
         <>
           {props.previewTab === 'email' && (
             <div className="space-y-2 h-140">
               <iframe
-                title="Simulated email HTML preview"
+                title="Virtual email HTML preview"
                 sandbox=""
                 srcDoc={
-                  props.selectedMessage.bodyHtml || '<p>(empty html body)</p>'
+                  props.selectedEmail.bodyHtml || '<p>(empty html body)</p>'
                 }
                 className="w-full h-full border rounded"
               />
@@ -93,30 +83,30 @@ export const Preview = (props: PreviewProps) => (
                   <span className="font-semibold !text-slate-900">
                     Subject:
                   </span>{' '}
-                  {props.selectedMessage.subject || '(no subject)'}
+                  {props.selectedEmail.subject || '(no subject)'}
                 </div>
                 <div>
                   <span className="font-semibold !text-slate-900">From:</span>{' '}
-                  {props.selectedMessage.sender}
+                  {props.selectedEmail.sender}
                 </div>
                 <div>
                   <span className="font-semibold !text-slate-900">To:</span>{' '}
-                  {props.selectedMessage.recipientsTo}
+                  {props.selectedEmail.recipientsTo}
                 </div>
                 <div>
                   <span className="font-semibold !text-slate-900">Sent:</span>{' '}
-                  {props.FormatDate(props.selectedMessage.sentUtc)}
+                  {props.FormatDate(props.selectedEmail.sentUtc)}
                 </div>
                 <div>
                   <span className="font-semibold !text-slate-900">Status:</span>{' '}
-                  {props.selectedMessage.status}
+                  {props.selectedEmail.status}
                 </div>
               </div>
 
               <div className="space-y-2">
                 <h3 className="font-semibold !text-slate-900">Plain text</h3>
                 <pre className="p-3 rounded bg-slate-100 text-sm whitespace-pre-wrap !text-slate-900">
-                  {props.selectedMessage.bodyPlainText ||
+                  {props.selectedEmail.bodyPlainText ||
                     '(empty plain text body)'}
                 </pre>
               </div>
