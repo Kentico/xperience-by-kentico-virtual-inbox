@@ -1,8 +1,12 @@
 using CMS.DataEngine;
+using CMS.DataEngine.Query;
 using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.VirtualInbox;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 [assembly: UIPage(
     uiPageType: typeof(VirtualInboxPage),
@@ -16,38 +20,43 @@ using Kentico.Xperience.VirtualInbox;
 namespace Kentico.Xperience.VirtualInbox;
 
 [UIEvaluatePermission(SystemPermissions.VIEW)]
-public class VirtualInboxPage(IInfoProvider<VirtualEmailInfo> virtualEmailProvider) : Page<VirtualInboxClientProperties>
+public class VirtualInboxPage(
+    IInfoProvider<VirtualEmailInfo> virtualEmailProvider,
+    IOptions<VirtualInboxOptions> virtualInboxOptions) : Page<VirtualInboxClientProperties>
 {
-    private const string LOAD_MESSAGES_COMMAND = "LoadVirtualEmails";
-    private const string REFRESH_MESSAGES_COMMAND = "RefreshVirtualEmails";
-    private const string LOAD_MESSAGE_DETAIL_COMMAND = "LoadVirtualEmailDetail";
-    private const string DELETE_MESSAGE_COMMAND = "DeleteVirtualEmail";
+    private const string LOAD_EMAILS_COMMAND = "LoadVirtualEmails";
+    private const string REFRESH_EMAILS_COMMAND = "RefreshVirtualEmails";
+    private const string LOAD_EMAIL_DETAIL_COMMAND = "LoadVirtualEmailDetail";
+    private const string DELETE_EMAIL_COMMAND = "DeleteVirtualEmail";
+    private const string DELETE_EMAILS_COMMAND = "DeleteVirtualEmails";
 
     public override async Task<VirtualInboxClientProperties> ConfigureTemplateProperties(VirtualInboxClientProperties properties)
     {
-        properties.LoadMessagesCommandName = LOAD_MESSAGES_COMMAND;
-        properties.RefreshMessagesCommandName = REFRESH_MESSAGES_COMMAND;
-        properties.LoadMessageDetailCommandName = LOAD_MESSAGE_DETAIL_COMMAND;
-        properties.DeleteMessageCommandName = DELETE_MESSAGE_COMMAND;
-        properties.Messages = await LoadMessages();
+        properties.LoadEmailsCommandName = LOAD_EMAILS_COMMAND;
+        properties.RefreshEmailsCommandName = REFRESH_EMAILS_COMMAND;
+        properties.LoadEmailDetailCommandName = LOAD_EMAIL_DETAIL_COMMAND;
+        properties.DeleteEmailCommandName = DELETE_EMAIL_COMMAND;
+        properties.DeleteEmailsCommandName = DELETE_EMAILS_COMMAND;
+        properties.IsEnabled = virtualInboxOptions.Value.Enabled;
+        properties.Emails = await LoadEmails();
 
         return properties;
     }
 
-    [PageCommand(CommandName = LOAD_MESSAGES_COMMAND, Permission = SystemPermissions.VIEW)]
-    public async Task<ICommandResponse> LoadMessagesCommand() =>
-        ResponseFrom(await LoadMessages());
+    [PageCommand(CommandName = LOAD_EMAILS_COMMAND, Permission = SystemPermissions.VIEW)]
+    public async Task<ICommandResponse> LoadEmailsCommand() =>
+        ResponseFrom(await LoadEmails());
 
-    [PageCommand(CommandName = LOAD_MESSAGE_DETAIL_COMMAND, Permission = SystemPermissions.VIEW)]
-    public async Task<ICommandResponse> LoadMessageDetail(LoadVirtualEmailDetailCommandParams commandParams) =>
-        ResponseFrom(await LoadMessageDetail(commandParams.MessageGuid));
+    [PageCommand(CommandName = LOAD_EMAIL_DETAIL_COMMAND, Permission = SystemPermissions.VIEW)]
+    public async Task<ICommandResponse> LoadEmailDetail(LoadVirtualEmailDetailCommandParams commandParams) =>
+        ResponseFrom(await LoadEmailDetail(commandParams.MessageGuid));
 
-    [PageCommand(CommandName = REFRESH_MESSAGES_COMMAND, Permission = SystemPermissions.VIEW)]
-    public async Task<ICommandResponse> RefreshMessages(RefreshVirtualEmailsCommandParams commandParams) =>
-        ResponseFrom(await LoadMessages(commandParams.LastRetrievedUtc, commandParams.LastRetrievedId));
+    [PageCommand(CommandName = REFRESH_EMAILS_COMMAND, Permission = SystemPermissions.VIEW)]
+    public async Task<ICommandResponse> RefreshEmails(RefreshVirtualEmailsCommandParams commandParams) =>
+        ResponseFrom(await LoadEmails(commandParams.LastRetrievedUtc, commandParams.LastRetrievedId));
 
-    [PageCommand(CommandName = DELETE_MESSAGE_COMMAND, Permission = SystemPermissions.UPDATE)]
-    public async Task<ICommandResponse> DeleteMessage(DeleteVirtualEmailCommandParams commandParams)
+    [PageCommand(CommandName = DELETE_EMAIL_COMMAND, Permission = SystemPermissions.UPDATE)]
+    public async Task<ICommandResponse> DeleteEmail(DeleteVirtualEmailCommandParams commandParams)
     {
         var item = (await virtualEmailProvider.Get()
             .WhereEquals(nameof(VirtualEmailInfo.VirtualEmailGUID), commandParams.MessageGuid)
@@ -65,7 +74,37 @@ public class VirtualInboxPage(IInfoProvider<VirtualEmailInfo> virtualEmailProvid
         return ResponseFrom(true);
     }
 
-    private async Task<List<VirtualEmailListItemDto>> LoadMessages(DateTime? sinceUtc = null, int? sinceId = null)
+    [PageCommand(CommandName = DELETE_EMAILS_COMMAND, Permission = SystemPermissions.UPDATE)]
+    public async Task<ICommandResponse> DeleteEmails(DeleteVirtualEmailsCommandParams commandParams)
+    {
+        int[]? messageIds = commandParams.MessageIds?.Distinct().ToArray();
+        var query = virtualEmailProvider.Get();
+        var whereCondition = new WhereCondition();
+
+        if (messageIds is { Length: > 0 })
+        {
+            query = query.WhereIn(nameof(VirtualEmailInfo.VirtualEmailID), messageIds);
+            whereCondition.WhereIn(nameof(VirtualEmailInfo.VirtualEmailID), messageIds);
+        }
+        else
+        {
+            // No explicit IDs means delete all virtual emails.
+            whereCondition.WhereTrue("1 = 1");
+        }
+
+        int itemCount = await query.GetCountAsync();
+
+        if (itemCount == 0)
+        {
+            return ResponseFrom(0);
+        }
+
+        virtualEmailProvider.BulkDelete(whereCondition);
+
+        return ResponseFrom(itemCount);
+    }
+
+    private async Task<List<VirtualEmailListItemDto>> LoadEmails(DateTime? sinceUtc = null, int? sinceId = null)
     {
         var query = virtualEmailProvider.Get();
 
@@ -94,7 +133,7 @@ public class VirtualInboxPage(IInfoProvider<VirtualEmailInfo> virtualEmailProvid
         return items;
     }
 
-    private async Task<VirtualEmailDetailDto?> LoadMessageDetail(Guid messageGuid)
+    private async Task<VirtualEmailDetailDto?> LoadEmailDetail(Guid messageGuid)
     {
         var item = (await virtualEmailProvider.Get()
             .WhereEquals(nameof(VirtualEmailInfo.VirtualEmailGUID), messageGuid)
@@ -123,11 +162,13 @@ public class VirtualInboxPage(IInfoProvider<VirtualEmailInfo> virtualEmailProvid
 
 public class VirtualInboxClientProperties : TemplateClientProperties
 {
-    public IEnumerable<VirtualEmailListItemDto> Messages { get; set; } = [];
-    public string LoadMessagesCommandName { get; set; } = string.Empty;
-    public string RefreshMessagesCommandName { get; set; } = string.Empty;
-    public string LoadMessageDetailCommandName { get; set; } = string.Empty;
-    public string DeleteMessageCommandName { get; set; } = string.Empty;
+    public bool IsEnabled { get; set; }
+    public IEnumerable<VirtualEmailListItemDto> Emails { get; set; } = [];
+    public string LoadEmailsCommandName { get; set; } = string.Empty;
+    public string RefreshEmailsCommandName { get; set; } = string.Empty;
+    public string LoadEmailDetailCommandName { get; set; } = string.Empty;
+    public string DeleteEmailCommandName { get; set; } = string.Empty;
+    public string DeleteEmailsCommandName { get; set; } = string.Empty;
 }
 
 public record VirtualEmailListItemDto(
@@ -154,3 +195,5 @@ public record LoadVirtualEmailDetailCommandParams(Guid MessageGuid);
 public record RefreshVirtualEmailsCommandParams(DateTime? LastRetrievedUtc, int? LastRetrievedId);
 
 public record DeleteVirtualEmailCommandParams(Guid MessageGuid);
+
+public record DeleteVirtualEmailsCommandParams(IReadOnlyCollection<int>? MessageIds);
