@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Info } from 'lucide-react';
 import { usePageCommand } from '@kentico/xperience-admin-base';
 import { Inbox } from './Inbox';
@@ -13,10 +13,6 @@ type LoadVirtualEmailDetailCommandParams = {
 type RefreshVirtualEmailsCommandParams = {
   lastRetrievedUtc?: string;
   lastRetrievedId?: number;
-};
-
-type DeleteVirtualEmailCommandParams = {
-  messageGuid: string;
 };
 
 type DeleteVirtualEmailsCommandParams = {
@@ -77,11 +73,34 @@ export const VirtualInboxTemplate = (
   const [searchTerm, setSearchTerm] = useState('');
   const [emailsInProgress, setEmailsInProgress] = useState(false);
   const [detailInProgress, setDetailInProgress] = useState(false);
-  const [deleteInProgressEmailGuid, setDeleteInProgressEmailGuid] = useState<
-    string | null
-  >(null);
   const [bulkDeleteInProgress, setBulkDeleteInProgress] = useState(false);
   const [selectedEmailGuids, setSelectedEmailGuids] = useState<string[]>([]);
+  const [isInfoPopoverOpen, setIsInfoPopoverOpen] = useState(false);
+  const infoPopoverRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      if (!infoPopoverRef.current?.contains(target)) {
+        setIsInfoPopoverOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsInfoPopoverOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
 
   const { execute: loadEmailDetail } = usePageCommand<
     VirtualEmailDetailDto | null,
@@ -126,13 +145,6 @@ export const VirtualInboxTemplate = (
     },
   );
 
-  const { execute: deleteEmail } = usePageCommand<
-    boolean,
-    DeleteVirtualEmailCommandParams
-  >(props.deleteEmailCommandName, {
-    after: () => undefined,
-  });
-
   const { execute: deleteEmails } = usePageCommand<
     number,
     DeleteVirtualEmailsCommandParams
@@ -168,24 +180,6 @@ export const VirtualInboxTemplate = (
       }
     } finally {
       setEmailsInProgress(false);
-    }
-  };
-
-  const removeEmail = async (emailGuid: string) => {
-    setDeleteInProgressEmailGuid(emailGuid);
-    try {
-      await deleteEmail({ messageGuid: emailGuid });
-      setEmails((previous) =>
-        previous.filter((item) => item.messageGuid !== emailGuid),
-      );
-      setSelectedEmailGuids((previous) =>
-        previous.filter((guid) => guid !== emailGuid),
-      );
-      setSelectedEmail((previous) =>
-        previous?.messageGuid === emailGuid ? null : previous,
-      );
-    } finally {
-      setDeleteInProgressEmailGuid(null);
     }
   };
 
@@ -317,28 +311,33 @@ export const VirtualInboxTemplate = (
             <h1 className="text-4xl font-bold tracking-tight !text-slate-900">
               Virtual email inbox
             </h1>
-            <div className="relative group">
+            <div className="relative" ref={infoPopoverRef}>
               <button
                 aria-label="Virtual inbox information"
+                aria-expanded={isInfoPopoverOpen}
+                aria-haspopup="dialog"
                 className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white !text-slate-700 hover:bg-slate-50"
+                onClick={() => setIsInfoPopoverOpen((value) => !value)}
                 type="button"
               >
                 <Info size={16} />
               </button>
-              <div className="pointer-events-none absolute left-0 top-10 z-20 hidden w-96 rounded-md border border-slate-200 bg-white p-3 text-sm leading-6 !text-slate-700 shadow-lg group-hover:block">
-                When enabled, the Virtual Inbox captures emails from Xperience
-                by Kentico&apos;s email queue instead of sending them to
-                recipients. For more information, visit{' '}
-                <a
-                  className="pointer-events-auto font-medium !text-sky-700 underline"
-                  href="https://github.com/Kentico/xperience-by-kentico-virtual-inbox"
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Kentico&apos;s GitHub repository
-                </a>{' '}
-                for this integration.
-              </div>
+              {isInfoPopoverOpen && (
+                <div className="absolute left-0 top-10 z-20 w-96 rounded-md border border-slate-200 bg-white p-3 text-sm leading-6 !text-slate-700 shadow-lg">
+                  When enabled, the Virtual Inbox captures emails from Xperience
+                  by Kentico&apos;s email queue instead of sending them to
+                  recipients. For more information, visit{' '}
+                  <a
+                    className="font-medium !text-sky-700 underline"
+                    href="https://github.com/Kentico/xperience-by-kentico-virtual-inbox"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Kentico&apos;s GitHub repository
+                  </a>{' '}
+                  for this integration.
+                </div>
+              )}
             </div>
           </div>
           <button
@@ -361,32 +360,36 @@ export const VirtualInboxTemplate = (
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:min-h-[calc(100vh-300px)]">
-            <Inbox
-              FormatDate={formatDate}
-              OnDeleteAllOrSelected={removeAllOrSelectedEmails}
-              OnOpenEmail={openEmail}
-              OnRemoveEmail={removeEmail}
-              OnSearchTermChange={setSearchTerm}
-              OnToggleEmailSelection={toggleEmailSelection}
-              OnToggleSelectAllFiltered={toggleSelectAllFiltered}
-              allFilteredSelected={allFilteredSelected}
-              bulkDeleteInProgress={bulkDeleteInProgress}
-              deleteInProgressEmailGuid={deleteInProgressEmailGuid}
-              detailInProgress={detailInProgress}
-              filteredEmails={filteredEmails}
-              hasAnyEmails={emails.length > 0}
-              hasSelectedEmails={selectedEmailGuids.length > 0}
-              searchTerm={searchTerm}
-              selectedEmailGuids={selectedEmailGuids}
-            />
-            <Preview
-              FormatDate={formatDate}
-              OnClose={() => setSelectedEmail(null)}
-              SetPreviewTab={setPreviewTab}
-              previewTab={previewTab}
-              selectedEmail={selectedEmail}
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:h-[calc(100vh-300px)] lg:overflow-hidden">
+            <div className="min-h-0">
+              <Inbox
+                FormatDate={formatDate}
+                OnDeleteAllOrSelected={removeAllOrSelectedEmails}
+                OnOpenEmail={openEmail}
+                OnSearchTermChange={setSearchTerm}
+                OnToggleEmailSelection={toggleEmailSelection}
+                OnToggleSelectAllFiltered={toggleSelectAllFiltered}
+                allFilteredSelected={allFilteredSelected}
+                bulkDeleteInProgress={bulkDeleteInProgress}
+                detailInProgress={detailInProgress}
+                filteredEmails={filteredEmails}
+                hasAnyEmails={emails.length > 0}
+                hasSelectedEmails={selectedEmailGuids.length > 0}
+                searchTerm={searchTerm}
+                selectedEmailGuids={selectedEmailGuids}
+                selectedEmailGuid={selectedEmail?.messageGuid ?? null}
+                totalEmailCount={emails.length}
+              />
+            </div>
+            <div className="min-h-0">
+              <Preview
+                FormatDate={formatDate}
+                OnClose={() => setSelectedEmail(null)}
+                SetPreviewTab={setPreviewTab}
+                previewTab={previewTab}
+                selectedEmail={selectedEmail}
+              />
+            </div>
           </div>
         )}
       </div>

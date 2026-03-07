@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, FileText, RefreshCw, Search, Trash2 } from 'lucide-react';
+import { RefreshCw, Search, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import type { VirtualEmailListItemDto } from './types';
 import {
@@ -13,6 +13,8 @@ import {
 
 interface InboxProps {
   filteredEmails: VirtualEmailListItemDto[];
+  totalEmailCount: number;
+  selectedEmailGuid: string | null;
   hasAnyEmails: boolean;
   hasSelectedEmails: boolean;
   allFilteredSelected: boolean;
@@ -20,21 +22,21 @@ interface InboxProps {
   searchTerm: string;
   detailInProgress: boolean;
   bulkDeleteInProgress: boolean;
-  deleteInProgressEmailGuid: string | null;
   FormatDate: (dateString: string) => string;
   OnSearchTermChange: (value: string) => void;
-  OnOpenEmail: (messageGuid: string, tab?: 'email' | 'metadata') => void;
-  OnRemoveEmail: (messageGuid: string) => void;
+  OnOpenEmail: (messageGuid: string) => void;
   OnDeleteAllOrSelected: () => void;
   OnToggleEmailSelection: (messageGuid: string, checked: boolean) => void;
   OnToggleSelectAllFiltered: (checked: boolean) => void;
 }
 
 export const Inbox = (props: InboxProps) => (
-  <Card className="shadow-lg overflow-hidden">
+  <Card className="shadow-lg overflow-hidden h-full min-h-0 flex flex-col">
     <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100">
       <div className="flex items-center justify-between gap-4">
-        <CardTitle className="text-2xl !text-slate-900">Inbox</CardTitle>
+        <CardTitle className="text-2xl !text-slate-900">
+          Inbox ({props.totalEmailCount})
+        </CardTitle>
         <button
           className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900"
           disabled={props.bulkDeleteInProgress || !props.hasAnyEmails}
@@ -49,8 +51,8 @@ export const Inbox = (props: InboxProps) => (
           {props.bulkDeleteInProgress
             ? 'Deleting...'
             : props.hasSelectedEmails
-              ? 'Delete selected'
-              : 'Delete all'}
+              ? `Delete selected (${props.selectedEmailGuids.length})`
+              : `Delete all (${props.selectedEmailGuids.length} selected)`}
         </button>
       </div>
       <div className="relative mt-3">
@@ -67,7 +69,7 @@ export const Inbox = (props: InboxProps) => (
         />
       </div>
     </CardHeader>
-    <CardContent className="p-0 overflow-auto">
+    <CardContent className="p-0 flex-1 min-h-0 overflow-y-auto">
       <Table className="table-fixed">
         <TableHeader>
           <TableRow className="bg-slate-50">
@@ -94,20 +96,20 @@ export const Inbox = (props: InboxProps) => (
             <TableHead className="font-semibold !text-slate-700">
               Sent
             </TableHead>
-            <TableHead className="w-16 font-semibold !text-slate-700">
-              Open
-            </TableHead>
-            <TableHead className="w-20 font-semibold !text-slate-700">
-              Metadata
-            </TableHead>
-            <TableHead className="w-16 font-semibold !text-slate-700">
-              Delete
-            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {props.filteredEmails.map((message) => (
-            <TableRow key={message.messageGuid}>
+            <TableRow
+              key={message.messageGuid}
+              aria-selected={props.selectedEmailGuid === message.messageGuid}
+              className={`cursor-pointer hover:bg-slate-50 ${props.selectedEmailGuid === message.messageGuid ? 'bg-sky-100 ring-2 ring-inset ring-sky-300 border-l-4 border-l-sky-500' : ''} ${props.detailInProgress ? 'opacity-70' : ''}`}
+              onClick={() => {
+                if (!props.detailInProgress) {
+                  props.OnOpenEmail(message.messageGuid);
+                }
+              }}
+            >
               <TableCell>
                 <input
                   aria-label={`Select email ${message.subject || message.messageGuid}`}
@@ -115,6 +117,7 @@ export const Inbox = (props: InboxProps) => (
                     message.messageGuid,
                   )}
                   className="h-4 w-4 rounded border-slate-300"
+                  onClick={(event) => event.stopPropagation()}
                   onChange={(event) =>
                     props.OnToggleEmailSelection(
                       message.messageGuid,
@@ -136,62 +139,13 @@ export const Inbox = (props: InboxProps) => (
               <TableCell className="!text-slate-700">
                 {props.FormatDate(message.sentUtc)}
               </TableCell>
-              <TableCell>
-                <button
-                  className="inline-flex items-center justify-center rounded-md h-9 w-9 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900"
-                  disabled={props.detailInProgress}
-                  onClick={() => props.OnOpenEmail(message.messageGuid)}
-                  title="Open email"
-                  type="button"
-                >
-                  {props.detailInProgress ? (
-                    <RefreshCw className="animate-spin" size={16} />
-                  ) : (
-                    <Eye size={16} />
-                  )}
-                </button>
-              </TableCell>
-              <TableCell>
-                <button
-                  className="inline-flex items-center justify-center rounded-md h-9 w-9 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900"
-                  disabled={props.detailInProgress}
-                  onClick={() =>
-                    props.OnOpenEmail(message.messageGuid, 'metadata')
-                  }
-                  title="Open metadata"
-                  type="button"
-                >
-                  {props.detailInProgress ? (
-                    <RefreshCw className="animate-spin" size={16} />
-                  ) : (
-                    <FileText size={16} />
-                  )}
-                </button>
-              </TableCell>
-              <TableCell>
-                <button
-                  className="inline-flex items-center justify-center rounded-md h-9 w-9 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900 disabled:opacity-50"
-                  disabled={
-                    props.deleteInProgressEmailGuid === message.messageGuid
-                  }
-                  onClick={() => props.OnRemoveEmail(message.messageGuid)}
-                  title="Delete email"
-                  type="button"
-                >
-                  {props.deleteInProgressEmailGuid === message.messageGuid ? (
-                    <RefreshCw className="animate-spin" size={16} />
-                  ) : (
-                    <Trash2 size={16} />
-                  )}
-                </button>
-              </TableCell>
             </TableRow>
           ))}
           {props.filteredEmails.length === 0 && (
             <TableRow>
               <TableCell
                 className="p-8 text-center !text-slate-500"
-                colSpan={8}
+                colSpan={5}
               >
                 {props.searchTerm.trim()
                   ? `No emails match "${props.searchTerm}".`
