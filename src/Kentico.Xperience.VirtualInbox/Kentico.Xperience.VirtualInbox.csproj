@@ -4,7 +4,7 @@
     <Product>Xperience by Kentico Virtual Inbox</Product>
     <Title>$(Product)</Title>
     <PackageId>Kentico.Xperience.VirtualInbox</PackageId>
-    <Description>Adds core objects and services for Xperience by Kentico Virtual Inbox.</Description>
+    <Description>Adds core object types and services for Xperience by Kentico Virtual Inbox.</Description>
   </PropertyGroup>
 
   <ItemGroup>
