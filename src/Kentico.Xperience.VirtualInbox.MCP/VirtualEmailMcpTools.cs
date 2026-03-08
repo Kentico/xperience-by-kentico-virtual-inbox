@@ -20,6 +20,8 @@ public static class VirtualEmailMcpTools
         int timeoutMs = 30_000,
         [Description("Optional filter for exact channel name.")]
         string? channelName = null,
+        [Description("Optional minimum Virtual Email ID. Only emails with an ID greater than this value are returned. Use this to ensure only newly arrived emails are matched and stale pre-existing emails are excluded.")]
+        int? sinceId = null,
         CancellationToken ct = default)
     {
         int boundedTimeout = Math.Clamp(timeoutMs, 0, 120_000);
@@ -34,6 +36,11 @@ public static class VirtualEmailMcpTools
                 .OrderByDescending(nameof(VirtualEmailInfo.VirtualEmailSentUTCDate))
                 .TopN(1)
                 .WhereLike(nameof(VirtualEmailInfo.VirtualEmailRecipientsTo), $"%{EscapeLikePattern(inbox)}%");
+
+            if (sinceId.HasValue)
+            {
+                query = query.WhereGreaterThan(nameof(VirtualEmailInfo.VirtualEmailID), sinceId.Value);
+            }
 
             if (!string.IsNullOrWhiteSpace(subjectContains))
             {
