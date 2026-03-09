@@ -25,6 +25,7 @@ What are some use cases for this integration?
 
 ![Administration UI virtual inbox](https://raw.githubusercontent.com/kentico/xperience-by-kentico-virtual-inbox/main/images/admin-virtual-inbox-preview.jpg)
 ![Agent driven virtual inbox MCP server](https://raw.githubusercontent.com/kentico/xperience-by-kentico-virtual-inbox/main/images/vscode-copilot-virtual-inbox-mcp.jpg)
+![Agent waiting for subscription email via Virtual Inbox MCP](https://raw.githubusercontent.com/kentico/xperience-by-kentico-virtual-inbox/main/images/vscode-copilot-virtual-inbox-mcp-wait-for-email.jpg)
 
 ## Requirements
 
@@ -68,13 +69,20 @@ dotnet add package Kentico.Xperience.VirtualInbox.MCP
 
    ```csharp
    // ...
-   builder.Services.AddVirtualInboxClient(builder.Configuration); // Adds this library's services
+
    if (env.IsDevelopment())
    {
       builder.Services
+        // Adds this library's services
+        .AddVirtualInboxClient(builder.Configuration)
         .AddMcpServer() // Host application is responsible for adding the McpServer
         .WithHttpTransport()
         .WithVirtualInboxTools(); // Adds this library's MCP tools
+   }
+   else
+   {
+      // Adds this library's services without email capture
+      builder.Services.AddVirtualInboxCore();
    }
    // ...
    ```

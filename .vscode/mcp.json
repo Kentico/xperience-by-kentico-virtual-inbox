@@ -6,7 +6,7 @@
     },
     "kentico.virtual-inbox": {
       "type": "http",
-      "url": "http://localhost:23146/mcp/virtual-inbox"
+      "url": "http://localhost:23146/mcp"
     }
   }
 }
