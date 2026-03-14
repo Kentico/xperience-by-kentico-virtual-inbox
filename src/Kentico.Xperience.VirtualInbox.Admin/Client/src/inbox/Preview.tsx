@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import type { VirtualEmailDetailDto } from './types';
+import { Button, NameToggleButtons } from '../ui/xperience';
 
 interface PreviewProps {
   selectedEmail: VirtualEmailDetailDto | null;
@@ -12,51 +12,35 @@ interface PreviewProps {
 }
 
 export const Preview = (props: PreviewProps) => (
-  <Card className="shadow-lg">
-    <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100">
+  <div className="xp-surface h-full min-h-0 flex flex-col">
+    <div className="xp-surfaceHeader">
       <div className="flex items-center justify-between">
-        <CardTitle className="text-2xl !text-slate-900">Preview</CardTitle>
+        <h2 className="xp-subtitle">Preview</h2>
         {props.selectedEmail && (
-          <button
-            className="inline-flex items-center justify-center rounded-md h-8 w-8 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900"
+          <Button
+            color="quinary"
+            icon={<X size={16} />}
             onClick={props.OnClose}
             title="Close preview"
-            type="button"
-          >
-            <X size={16} />
-          </button>
+          />
         )}
       </div>
       {props.selectedEmail && (
-        <div className="flex items-center gap-2 mt-3">
-          <button
-            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors h-8 px-3 py-1 border ${
-              props.previewTab === 'email'
-                ? 'border-slate-900 bg-slate-900 !text-white'
-                : 'border-slate-200 bg-white hover:bg-slate-100 !text-slate-900'
-            }`}
-            onClick={() => props.SetPreviewTab('email')}
-            type="button"
-          >
-            Email
-          </button>
-          <button
-            className={`inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors h-8 px-3 py-1 border ${
-              props.previewTab === 'metadata'
-                ? 'border-slate-900 bg-slate-900 !text-white'
-                : 'border-slate-200 bg-white hover:bg-slate-100 !text-slate-900'
-            }`}
-            onClick={() => props.SetPreviewTab('metadata')}
-            type="button"
-          >
-            Metadata
-          </button>
-        </div>
+        <NameToggleButtons
+          items={[
+            { id: 'email', label: 'Email' },
+            { id: 'metadata', label: 'Metadata' },
+          ]}
+          OnChange={(id) => props.SetPreviewTab(id as 'email' | 'metadata')}
+          selectedItemId={props.previewTab}
+        />
       )}
-    </CardHeader>
-    <CardContent className="pt-6 space-y-4 h-full overflow-auto">
+    </div>
+    <div
+      className={`xp-surfaceBody xp-previewBody flex-1 min-h-0 ${props.selectedEmail ? 'overflow-hidden' : 'overflow-auto'}`}
+    >
       {!props.selectedEmail && (
-        <p className="text-sm !text-slate-600">
+        <p className="text-sm xp-muted">
           Select an email from the inbox to view details.
         </p>
       )}
@@ -64,48 +48,46 @@ export const Preview = (props: PreviewProps) => (
       {props.selectedEmail && (
         <>
           {props.previewTab === 'email' && (
-            <div className="space-y-2 h-140">
+            <div className="xp-emailPane">
               <iframe
                 title="Virtual email HTML preview"
                 sandbox=""
                 srcDoc={
                   props.selectedEmail.bodyHtml || '<p>(empty html body)</p>'
                 }
-                className="w-full h-full border rounded"
+                className="xp-emailFrame"
               />
             </div>
           )}
 
           {props.previewTab === 'metadata' && (
-            <div className="space-y-3">
-              <div className="text-sm space-y-1 !text-slate-700">
-                <div>
-                  <span className="font-semibold !text-slate-900">
-                    Subject:
-                  </span>{' '}
-                  {props.selectedEmail.subject || '(no subject)'}
+            <div className="xp-metadataPane">
+              <div className="xp-metaGrid xp-muted">
+                <div className="xp-metaRow">
+                  <span className="xp-metaLabel">Subject:</span>
+                  <span>{props.selectedEmail.subject || '(no subject)'}</span>
                 </div>
-                <div>
-                  <span className="font-semibold !text-slate-900">From:</span>{' '}
-                  {props.selectedEmail.sender}
+                <div className="xp-metaRow">
+                  <span className="xp-metaLabel">From:</span>
+                  <span>{props.selectedEmail.sender}</span>
                 </div>
-                <div>
-                  <span className="font-semibold !text-slate-900">To:</span>{' '}
-                  {props.selectedEmail.recipientsTo}
+                <div className="xp-metaRow">
+                  <span className="xp-metaLabel">To:</span>
+                  <span>{props.selectedEmail.recipientsTo}</span>
                 </div>
-                <div>
-                  <span className="font-semibold !text-slate-900">Sent:</span>{' '}
-                  {props.FormatDate(props.selectedEmail.sentUtc)}
+                <div className="xp-metaRow">
+                  <span className="xp-metaLabel">Sent:</span>
+                  <span>{props.FormatDate(props.selectedEmail.sentUtc)}</span>
                 </div>
-                <div>
-                  <span className="font-semibold !text-slate-900">Status:</span>{' '}
-                  {props.selectedEmail.status}
+                <div className="xp-metaRow">
+                  <span className="xp-metaLabel">Status:</span>
+                  <span>{props.selectedEmail.status}</span>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <h3 className="font-semibold !text-slate-900">Plain text</h3>
-                <pre className="p-3 rounded bg-slate-100 text-sm whitespace-pre-wrap !text-slate-900">
+              <div className="xp-plainTextPane">
+                <h3 className="xp-sectionTitle">Plain text</h3>
+                <pre className="xp-codeBlock">
                   {props.selectedEmail.bodyPlainText ||
                     '(empty plain text body)'}
                 </pre>
@@ -114,6 +96,6 @@ export const Preview = (props: PreviewProps) => (
           )}
         </>
       )}
-    </CardContent>
-  </Card>
+    </div>
+  </div>
 );
