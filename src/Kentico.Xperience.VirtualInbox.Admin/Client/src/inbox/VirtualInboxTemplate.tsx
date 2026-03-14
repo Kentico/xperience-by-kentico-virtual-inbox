@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Info } from 'lucide-react';
+import { Info, RefreshCw } from 'lucide-react';
 import { usePageCommand } from '@kentico/xperience-admin-base';
 import { Inbox } from './Inbox';
 import { Preview } from './Preview';
 import type { VirtualEmailDetailDto, VirtualEmailListItemDto } from './types';
-import { Card, CardContent } from '../ui/card';
+import { Button } from '../ui/xperience';
 
 type LoadVirtualEmailDetailCommandParams = {
   messageGuid: string;
@@ -300,35 +300,28 @@ export const VirtualInboxTemplate = (
       selectedEmailGuids.includes(item.messageGuid),
     );
 
-  const buttonClassName =
-    'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 border border-slate-200 bg-white hover:bg-slate-100 !text-slate-900';
-
   return (
-    <div className="min-h-[calc(100vh-160px)] bg-gradient-to-br from-slate-50 to-slate-100 p-4 pb-0">
+    <div className="xp-page">
       <div className="w-full h-full space-y-8">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <h1 className="text-4xl font-bold tracking-tight !text-slate-900">
-              Virtual email inbox
-            </h1>
+            <h1 className="xp-title">Virtual email inbox</h1>
             <div className="relative" ref={infoPopoverRef}>
-              <button
+              <Button
                 aria-label="Virtual inbox information"
                 aria-expanded={isInfoPopoverOpen}
                 aria-haspopup="dialog"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white !text-slate-700 hover:bg-slate-50"
+                color="quinary"
+                icon={<Info size={16} />}
                 onClick={() => setIsInfoPopoverOpen((value) => !value)}
-                type="button"
-              >
-                <Info size={16} />
-              </button>
+              />
               {isInfoPopoverOpen && (
-                <div className="absolute left-0 top-10 z-20 w-96 rounded-md border border-slate-200 bg-white p-3 text-sm leading-6 !text-slate-700 shadow-lg">
+                <div className="xp-popover">
                   When enabled, the Virtual Inbox captures emails from Xperience
                   by Kentico&apos;s email queue instead of sending them to
                   recipients. For more information, visit{' '}
                   <a
-                    className="font-medium !text-sky-700 underline"
+                    className="xp-link"
                     href="https://github.com/Kentico/xperience-by-kentico-virtual-inbox"
                     rel="noreferrer"
                     target="_blank"
@@ -340,25 +333,29 @@ export const VirtualInboxTemplate = (
               )}
             </div>
           </div>
-          <button
-            className={buttonClassName}
+          <Button
             disabled={!props.isEnabled || emailsInProgress}
+            icon={
+              emailsInProgress ? (
+                <RefreshCw className="animate-spin" size={16} />
+              ) : undefined
+            }
+            inProgress={emailsInProgress}
             onClick={() => refreshInbox()}
-            type="button"
           >
             {emailsInProgress ? 'Refreshing...' : 'Refresh'}
-          </button>
+          </Button>
         </div>
 
         {!props.isEnabled ? (
-          <Card className="shadow-lg">
-            <CardContent className="p-6">
-              <p className="text-base !text-slate-700">
+          <div className="xp-surface">
+            <div className="xp-surfaceBody p-6">
+              <p className="text-base xp-muted">
                 The Virtual Inbox feature is disabled through application
                 settings.
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:h-[calc(100vh-300px)] lg:overflow-hidden">
             <div className="min-h-0">
