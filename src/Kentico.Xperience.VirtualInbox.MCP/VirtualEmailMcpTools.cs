@@ -9,7 +9,7 @@ namespace Kentico.Xperience.VirtualInbox.MCP;
 [McpServerToolType]
 public static class VirtualEmailMcpTools
 {
-    [McpServerTool, Description("Waits for a Virtual Email to appear matching the given criteria, polling every 500ms until a match is found or the timeout is reached.")]
+    [McpServerTool(UseStructuredContent = true), Description("Waits for a Virtual Email to appear matching the given criteria, polling every 500ms until a match is found or the timeout is reached.")]
     public static async Task<VirtualEmailMcpRecord?> WaitForEmail(
         IInfoProvider<VirtualEmailInfo> virtualEmailProvider,
         [Description("Recipient email address to wait for (matched as a substring of the recipients field).")]
@@ -72,7 +72,7 @@ public static class VirtualEmailMcpTools
         return null;
     }
 
-    [McpServerTool, Description("Lists Virtual Email records, ordered by send date descending.")]
+    [McpServerTool(UseStructuredContent = true), Description("Lists Virtual Email records, ordered by send date descending.")]
     public static async Task<IReadOnlyList<VirtualEmailMcpRecord>> ListVirtualEmails(
         IInfoProvider<VirtualEmailInfo> virtualEmailProvider,
         [Description("Maximum number of emails to return (1-200).")]
@@ -103,7 +103,7 @@ public static class VirtualEmailMcpTools
         return [.. items.Select(Map)];
     }
 
-    [McpServerTool, Description("Gets a single Virtual Email by GUID.")]
+    [McpServerTool(UseStructuredContent = true), Description("Gets a single Virtual Email by GUID.")]
     public static async Task<VirtualEmailMcpRecord?> GetVirtualEmailByGuid(
         IInfoProvider<VirtualEmailInfo> virtualEmailProvider,
         [Description("Virtual Email GUID.")]
