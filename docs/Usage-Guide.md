@@ -95,7 +95,26 @@ In `appsettings.Development.json` (or equivalent environment-specific configurat
 }
 ```
 
-### 4) Configure the mcp server in your tool
+### 4) (optional) Set email queue load interval in local or CI environments
+
+1. Update the `appsettings.Development.json` file to reduce the maximum time an email sits in Xperience's email queue before it is stored in the Virtual Inbox to improve UI and agent responsiveness.
+
+   ```json
+   "EmailQueueOptions": {
+     "ArchiveDuration": 14,
+     "LoadInterval": 500
+   },
+   ```
+
+   The default load interval is 60 seconds. The settings above reduce it to 500 milliseconds. Note: setting this value too low in production environments could result in increased database load from increased querying.
+
+1. Configure the `EmailQueueOptions` in your service registration.
+
+   ```csharp
+   services.Configure<EmailQueueOptions>(config.GetSection("EmailQueueOptions"))
+   ```
+
+### 5) Configure the mcp server in your tool
 
 1. Add your host application's URL and MCP server path (as configured by `app.MapMcp()`) to your AI tool's MCP server config.
 
@@ -181,22 +200,22 @@ Waits for a Virtual Email matching the given criteria to appear, polling every 5
 
 Each tool returns records with the following fields:
 
-| Field | Type | Description |
-|---|---|---|
-| `VirtualEmailID` | int | Auto-incremented database ID. |
-| `VirtualEmailGUID` | Guid | Unique identifier for the email. |
-| `VirtualEmailSender` | string | Sender address. |
-| `VirtualEmailRecipientsTo` | string | To recipients. |
-| `VirtualEmailRecipientsCc` | string | Cc recipients. |
-| `VirtualEmailRecipientsBcc` | string | Bcc recipients. |
-| `VirtualEmailSubject` | string | Email subject. |
-| `VirtualEmailBodyHTML` | string | HTML body. |
-| `VirtualEmailBodyPlainText` | string | Plain-text body. |
-| `VirtualEmailSentUTCDate` | DateTime | UTC timestamp when the email was sent. |
-| `VirtualEmailStatus` | string | Delivery status (e.g., `sent`, `failed`). |
-| `VirtualEmailErrorMessage` | string | Error details if the email failed to send. |
-| `VirtualEmailChannelName` | string | Email channel name. |
-| `VirtualEmailEmailConfigurationID` | int | Related email configuration ID. |
+| Field                              | Type     | Description                                |
+| ---------------------------------- | -------- | ------------------------------------------ |
+| `VirtualEmailID`                   | int      | Auto-incremented database ID.              |
+| `VirtualEmailGUID`                 | Guid     | Unique identifier for the email.           |
+| `VirtualEmailSender`               | string   | Sender address.                            |
+| `VirtualEmailRecipientsTo`         | string   | To recipients.                             |
+| `VirtualEmailRecipientsCc`         | string   | Cc recipients.                             |
+| `VirtualEmailRecipientsBcc`        | string   | Bcc recipients.                            |
+| `VirtualEmailSubject`              | string   | Email subject.                             |
+| `VirtualEmailBodyHTML`             | string   | HTML body.                                 |
+| `VirtualEmailBodyPlainText`        | string   | Plain-text body.                           |
+| `VirtualEmailSentUTCDate`          | DateTime | UTC timestamp when the email was sent.     |
+| `VirtualEmailStatus`               | string   | Delivery status (e.g., `sent`, `failed`).  |
+| `VirtualEmailErrorMessage`         | string   | Error details if the email failed to send. |
+| `VirtualEmailChannelName`          | string   | Email channel name.                        |
+| `VirtualEmailEmailConfigurationID` | int      | Related email configuration ID.            |
 
 ---
 
@@ -209,12 +228,12 @@ The following example shows a reliable E2E test pattern using Playwright with th
 //    This is the "watermark" that prevents stale emails from matching.
 const existing = await emailClient.callTool({
   name: "list_virtual_emails",
-  arguments: { limit: 1 }
+  arguments: { limit: 1 },
 });
 const sinceId: number = existing.content[0]?.VirtualEmailID ?? 0;
 
 // 2. Trigger the action that sends an email (e.g., submit a registration form).
-await page.click('#register-button');
+await page.click("#register-button");
 
 // 3. Wait only for emails that arrived AFTER the watermark.
 const email = await emailClient.callTool({
@@ -223,8 +242,8 @@ const email = await emailClient.callTool({
     inbox: "user@test.com",
     subjectContains: "Confirm your account",
     sinceId,
-    timeoutMs: 30000
-  }
+    timeoutMs: 30000,
+  },
 });
 
 // 4. Assert on the result.
