@@ -19,6 +19,7 @@ public static class VirtualInboxMcpServiceCollectionExtensions
     /// </remarks>
     /// <param name="builder">The MCP server builder.</param>
     /// <returns>The MCP server builder for method chaining.</returns>
+    [Obsolete(DeprecationMessages.PackageRenamed, DiagnosticId = DeprecationMessages.DiagnosticId, UrlFormat = DeprecationMessages.Url)]
     public static IMcpServerBuilder WithVirtualInboxTools(this IMcpServerBuilder builder) =>
         builder.WithToolsFromAssembly(typeof(VirtualEmailMcpTools).Assembly);
 
@@ -32,6 +33,7 @@ public static class VirtualInboxMcpServiceCollectionExtensions
     /// <param name="builder">The MCP server builder.</param>
     /// <param name="serializerOptions">Custom serialization options for the included tools.</param>
     /// <returns>The MCP server builder for method chaining.</returns>
+    [Obsolete(DeprecationMessages.PackageRenamed, DiagnosticId = DeprecationMessages.DiagnosticId, UrlFormat = DeprecationMessages.Url)]
     public static IMcpServerBuilder WithVirtualInboxTools(this IMcpServerBuilder builder, JsonSerializerOptions serializerOptions) =>
         builder.WithToolsFromAssembly(typeof(VirtualEmailMcpTools).Assembly, serializerOptions);
 }

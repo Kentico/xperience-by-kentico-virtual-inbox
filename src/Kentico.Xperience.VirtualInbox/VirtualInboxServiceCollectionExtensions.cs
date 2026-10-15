@@ -30,6 +30,7 @@ public static class VirtualInboxServiceCollectionExtensions
     /// </remarks>
     /// <param name="services">The service collection to register services into.</param>
     /// <returns>The service collection for method chaining.</returns>
+    [Obsolete(DeprecationMessages.PackageRenamed, DiagnosticId = DeprecationMessages.DiagnosticId, UrlFormat = DeprecationMessages.Url)]
     public static IServiceCollection AddVirtualInboxCore(this IServiceCollection services)
     {
         services.TryAddSingleton<IVirtualInboxModuleInstaller, VirtualInboxModuleInstaller>();
@@ -64,6 +65,7 @@ public static class VirtualInboxServiceCollectionExtensions
     /// <param name="services">The service collection to register services into.</param>
     /// <param name="config">The application configuration to read Virtual Inbox settings from.</param>
     /// <returns>The service collection for method chaining.</returns>
+    [Obsolete(DeprecationMessages.PackageRenamed, DiagnosticId = DeprecationMessages.DiagnosticId, UrlFormat = DeprecationMessages.Url)]
     public static IServiceCollection AddVirtualInboxClient(
         this IServiceCollection services,
         IConfiguration config)
@@ -108,6 +110,7 @@ public static class VirtualInboxServiceCollectionExtensions
 /// Settings can be overridden using environment variables (e.g., <c>Kentico__VirtualInbox__Enabled=true</c>).
 /// </para>
 /// </remarks>
+[Obsolete(DeprecationMessages.PackageRenamed, DiagnosticId = DeprecationMessages.DiagnosticId, UrlFormat = DeprecationMessages.Url)]
 public sealed class VirtualInboxOptions
 {
     /// <summary>

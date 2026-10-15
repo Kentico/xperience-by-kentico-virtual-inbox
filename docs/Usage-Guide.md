@@ -1,5 +1,8 @@
 # Usage Guide
 
+> [!WARNING]
+> **Deprecated package IDs.** Version 1.4.0 is the final release of `Kentico.Xperience.VirtualInbox`, `Kentico.Xperience.VirtualInbox.Admin`, and `Kentico.Xperience.VirtualInbox.MCP`. Future releases ship as `Kentico.Xperience.Labs.VirtualInbox*` packages with new namespaces (`Kentico.Xperience.Labs.VirtualInbox`). Run `dotnet list package --deprecated` to find references to the old packages. See the [GitHub repository](https://github.com/Kentico/xperience-by-kentico-virtual-inbox) for updates.
+
 This guide explains how to use the Virtual Inbox integration in an ASP.NET Core application, with an emphasis on MCP setup responsibilities.
 
 ## Overview
