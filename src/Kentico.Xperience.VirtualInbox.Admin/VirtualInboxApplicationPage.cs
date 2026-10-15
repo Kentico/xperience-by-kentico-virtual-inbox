@@ -8,7 +8,7 @@ using Kentico.Xperience.VirtualInbox;
     identifier: VirtualInboxApplicationPage.IDENTIFIER,
     type: typeof(VirtualInboxApplicationPage),
     slug: "virtual-inbox",
-    name: "Virtual inbox",
+    name: "Virtual Inbox (Labs)",
     category: BaseApplicationCategories.DEVELOPMENT,
     icon: Icons.Message,
     templateName: TemplateNames.SECTION_LAYOUT)]
