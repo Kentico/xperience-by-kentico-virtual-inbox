@@ -3,7 +3,7 @@
     <Product>Xperience by Kentico Virtual Inbox Administration module</Product>
     <Title>$(Product)</Title>
     <PackageId>Kentico.Xperience.VirtualInbox.Admin</PackageId>
-    <Description>Adds Administration application UI for Xperience by Kentico Virtual Inbox.</Description>
+    <Description>DEPRECATED: replaced by Kentico.Xperience.Labs.VirtualInbox.Admin. Adds Administration application UI for Xperience by Kentico Virtual Inbox.</Description>
   </PropertyGroup>
 
   <PropertyGroup>

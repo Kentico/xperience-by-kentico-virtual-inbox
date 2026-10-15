@@ -4,7 +4,7 @@
     <Product>Xperience by Kentico Virtual Inbox MCP Server</Product>
     <Title>$(Product)</Title>
     <PackageId>Kentico.Xperience.VirtualInbox.MCP</PackageId>
-    <Description>Adds MCP server tools for Xperience by Kentico Virtual Inbox.</Description>
+    <Description>DEPRECATED: replaced by Kentico.Xperience.Labs.VirtualInbox.MCP. Adds MCP server tools for Xperience by Kentico Virtual Inbox.</Description>
   </PropertyGroup>
 
   <ItemGroup>
