@@ -52,7 +52,7 @@ export const Inbox = (props: InboxProps) => (
             ? 'Deleting...'
             : props.hasSelectedEmails
               ? `Delete selected (${props.selectedEmailGuids.length})`
-              : `Delete all (${props.selectedEmailGuids.length} selected)`}
+              : 'Delete all'}
         </Button>
       </div>
       <div className="mt-3">

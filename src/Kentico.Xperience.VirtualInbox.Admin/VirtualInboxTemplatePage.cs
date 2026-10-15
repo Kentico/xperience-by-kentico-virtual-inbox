@@ -86,12 +86,6 @@ public class VirtualInboxPage(
             query = query.WhereIn(nameof(VirtualEmailInfo.VirtualEmailID), messageIds);
             whereCondition.WhereIn(nameof(VirtualEmailInfo.VirtualEmailID), messageIds);
         }
-        else
-        {
-            // No explicit IDs means delete all virtual emails.
-            whereCondition.WhereTrue("1 = 1");
-        }
-
         int itemCount = await query.GetCountAsync();
 
         if (itemCount == 0)
