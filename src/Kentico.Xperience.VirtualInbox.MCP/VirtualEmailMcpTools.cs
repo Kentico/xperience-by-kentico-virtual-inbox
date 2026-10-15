@@ -52,7 +52,7 @@ public static class VirtualEmailMcpTools
                 query = query.WhereEquals(nameof(VirtualEmailInfo.VirtualEmailChannelName), channelName);
             }
 
-            var item = (await query.GetEnumerableTypedResultAsync()).FirstOrDefault();
+            var item = (await query.GetEnumerableTypedResultAsync(cancellationToken: ct)).FirstOrDefault();
 
             if (item is not null)
             {

@@ -17,7 +17,7 @@ public class VirtualInboxEmailClient(
     {
         string channelName = (await channelProvider.Get()
             .Source(s => s.Join<EmailChannelInfo>(nameof(ChannelInfo.ChannelID), nameof(EmailChannelInfo.EmailChannelChannelID)))
-            .GetEnumerableTypedResultAsync())
+            .GetEnumerableTypedResultAsync(cancellationToken: cancellationToken))
             .Select(c => c.ChannelName)
             .FirstOrDefault() ?? "";
 
@@ -44,7 +44,7 @@ public class VirtualInboxEmailClient(
                 VirtualEmailChannelName = channelName
             };
 
-            await virtualEmailProvider.SetAsync(virtualEmail);
+            await virtualEmailProvider.SetAsync(virtualEmail, cancellationToken);
 
             return new EmailSendResult(success: true);
         }
