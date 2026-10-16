@@ -2,14 +2,14 @@
 
 [![Kentico Labs](https://img.shields.io/badge/Kentico_Labs-grey?labelColor=orange&logo=data:image/svg+xml;base64,PHN2ZyBjbGFzcz0ic3ZnLWljb24iIHN0eWxlPSJ3aWR0aDogMWVtOyBoZWlnaHQ6IDFlbTt2ZXJ0aWNhbC1hbGlnbjogbWlkZGxlO2ZpbGw6IGN1cnJlbnRDb2xvcjtvdmVyZmxvdzogaGlkZGVuOyIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik05NTYuMjg4IDgwNC40OEw2NDAgMjc3LjQ0VjY0aDMyYzE3LjYgMCAzMi0xNC40IDMyLTMycy0xNC40LTMyLTMyLTMyaC0zMjBjLTE3LjYgMC0zMiAxNC40LTMyIDMyczE0LjQgMzIgMzIgMzJIMzg0djIxMy40NEw2Ny43MTIgODA0LjQ4Qy00LjczNiA5MjUuMTg0IDUxLjIgMTAyNCAxOTIgMTAyNGg2NDBjMTQwLjggMCAxOTYuNzM2LTk4Ljc1MiAxMjQuMjg4LTIxOS41MnpNMjQxLjAyNCA2NDBMNDQ4IDI5NS4wNFY2NGgxMjh2MjMxLjA0TDc4Mi45NzYgNjQwSDI0MS4wMjR6IiAgLz48L3N2Zz4=)](https://github.com/Kentico/.github/blob/main/SUPPORT.md#labs-limited-support) [![CI: Build and Test](https://github.com/Kentico/xperience-by-kentico-virtual-inbox/actions/workflows/ci.yml/badge.svg)](https://github.com/Kentico/xperience-by-kentico-virtual-inbox/actions/workflows/ci.yml)
 
-> [!WARNING]
-> **Deprecated package IDs.** Version 1.4.0 is the final release of `Kentico.Xperience.VirtualInbox`, `Kentico.Xperience.VirtualInbox.Admin`, and `Kentico.Xperience.VirtualInbox.MCP`. Future releases ship as `Kentico.Xperience.Labs.VirtualInbox*` packages with new namespaces (`Kentico.Xperience.Labs.VirtualInbox`). Run `dotnet list package --deprecated` to find references to the old packages. See the [GitHub repository](https://github.com/Kentico/xperience-by-kentico-virtual-inbox) for updates.
+> [!NOTE]
+> These packages replace the old `Kentico.Xperience.VirtualInbox`, `Kentico.Xperience.VirtualInbox.Admin`, and `Kentico.Xperience.VirtualInbox.MCP` packages (final version 1.4.0). To migrate, swap the package references for `Kentico.Xperience.Labs.VirtualInbox*` and update `using Kentico.Xperience.VirtualInbox` to `using Kentico.Xperience.Labs.VirtualInbox`.
 
 | Package                              | NuGet                                                                                                                                                                                                   |
 | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kentico.Xperience.VirtualInbox       | [![Kentico.Xperience.VirtualInbox - NuGet Package](https://img.shields.io/nuget/v/Kentico.Xperience.VirtualInbox.svg)](https://www.nuget.org/packages/Kentico.Xperience.VirtualInbox)                   |
-| Kentico.Xperience.VirtualInbox.Admin | [![Kentico.Xperience.VirtualInbox.Admin - NuGet Package](https://img.shields.io/nuget/v/Kentico.Xperience.VirtualInbox.Admin.svg)](https://www.nuget.org/packages/Kentico.Xperience.VirtualInbox.Admin) |
-| Kentico.Xperience.VirtualInbox.MCP   | [![Kentico.Xperience.VirtualInbox.MCP - NuGet Package](https://img.shields.io/nuget/v/Kentico.Xperience.VirtualInbox.MCP.svg)](https://www.nuget.org/packages/Kentico.Xperience.VirtualInbox.MCP)       |
+| Kentico.Xperience.Labs.VirtualInbox       | [![Kentico.Xperience.Labs.VirtualInbox - NuGet Package](https://img.shields.io/nuget/v/Kentico.Xperience.Labs.VirtualInbox.svg)](https://www.nuget.org/packages/Kentico.Xperience.Labs.VirtualInbox)                   |
+| Kentico.Xperience.Labs.VirtualInbox.Admin | [![Kentico.Xperience.Labs.VirtualInbox.Admin - NuGet Package](https://img.shields.io/nuget/v/Kentico.Xperience.Labs.VirtualInbox.Admin.svg)](https://www.nuget.org/packages/Kentico.Xperience.Labs.VirtualInbox.Admin) |
+| Kentico.Xperience.Labs.VirtualInbox.MCP   | [![Kentico.Xperience.Labs.VirtualInbox.MCP - NuGet Package](https://img.shields.io/nuget/v/Kentico.Xperience.Labs.VirtualInbox.MCP.svg)](https://www.nuget.org/packages/Kentico.Xperience.Labs.VirtualInbox.MCP)       |
 
 ## Description
 
@@ -36,7 +36,7 @@ What are some use cases for this integration?
 
 | Xperience Version | Library Version                                         |
 | ----------------- | ------------------------------------------------------- |
-| >= 31.2.0         | 1.0.0 - 1.4.0 (final release under the old package IDs) |
+| >= 31.2.0         | 2.0.0+ (1.0.0 - 1.4.0 under the old `Kentico.Xperience.VirtualInbox*` IDs) |
 
 ### Dependencies
 
@@ -50,19 +50,19 @@ Add these package to your application using the .NET CLI.
 The core package adds the integration's object types and custom email client.
 
 ```powershell
-dotnet add package Kentico.Xperience.VirtualInbox
+dotnet add package Kentico.Xperience.Labs.VirtualInbox
 ```
 
 The admin project adds the virtual inbox administration UI application to the project.
 
 ```powershell
-dotnet add package Kentico.Xperience.VirtualInbox.Admin
+dotnet add package Kentico.Xperience.Labs.VirtualInbox.Admin
 ```
 
 The MCP project adds Virtual Inbox MCP tools that you can register on your application's MCP server.
 
 ```powershell
-dotnet add package Kentico.Xperience.VirtualInbox.MCP
+dotnet add package Kentico.Xperience.Labs.VirtualInbox.MCP
 ```
 
 ## Quick Start

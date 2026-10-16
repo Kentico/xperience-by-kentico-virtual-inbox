@@ -4,7 +4,7 @@ using CMS.DataEngine;
 
 using ModelContextProtocol.Server;
 
-namespace Kentico.Xperience.VirtualInbox.MCP;
+namespace Kentico.Xperience.Labs.VirtualInbox.MCP;
 
 [McpServerToolType]
 public static class VirtualEmailMcpTools

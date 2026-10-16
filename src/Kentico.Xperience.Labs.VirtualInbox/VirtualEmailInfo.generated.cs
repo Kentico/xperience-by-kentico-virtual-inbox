@@ -7,11 +7,11 @@ using CMS;
 using CMS.DataEngine;
 using CMS.Helpers;
 
-using Kentico.Xperience.VirtualInbox;
+using Kentico.Xperience.Labs.VirtualInbox;
 
 [assembly: RegisterObjectType(typeof(VirtualEmailInfo), VirtualEmailInfo.OBJECT_TYPE)]
 
-namespace Kentico.Xperience.VirtualInbox
+namespace Kentico.Xperience.Labs.VirtualInbox
 {
     /// <summary>
     /// Data container class for <see cref="VirtualEmailInfo"/>.

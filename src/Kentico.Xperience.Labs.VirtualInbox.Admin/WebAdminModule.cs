@@ -1,9 +1,9 @@
-﻿using Kentico.Xperience.Admin.Base;
-using Kentico.Xperience.VirtualInbox.Admin;
+using Kentico.Xperience.Admin.Base;
+using Kentico.Xperience.Labs.VirtualInbox.Admin;
 
 [assembly: CMS.RegisterModule(typeof(WebAdminModule))]
 
-namespace Kentico.Xperience.VirtualInbox.Admin;
+namespace Kentico.Xperience.Labs.VirtualInbox.Admin;
 
 internal class WebAdminModule : AdminModule
 {
@@ -16,6 +16,6 @@ internal class WebAdminModule : AdminModule
     {
         base.OnInit();
 
-        RegisterClientModule("kentico", "xperience-integrations-virtual-inbox-web-admin");
+        RegisterClientModule("kentico", "xperience-labs-virtual-inbox-admin");
     }
 }

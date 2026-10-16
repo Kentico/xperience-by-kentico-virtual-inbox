@@ -1125,7 +1125,7 @@
           "System.IO.Hashing": "8.0.0"
         }
       },
-      "kentico.xperience.virtualinbox": {
+      "kentico.xperience.labs.virtualinbox": {
         "type": "Project",
         "dependencies": {
           "kentico.xperience.core": "[31.2.0, )"

@@ -1,4 +1,4 @@
-﻿namespace Kentico.Xperience.VirtualInbox.Tests;
+namespace Kentico.Xperience.Labs.VirtualInbox.Tests;
 
 public class Tests
 {

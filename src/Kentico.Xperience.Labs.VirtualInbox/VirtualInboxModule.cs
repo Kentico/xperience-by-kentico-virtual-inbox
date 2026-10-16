@@ -3,13 +3,13 @@ using CMS.Base;
 using CMS.Core;
 using CMS.DataEngine;
 
-using Kentico.Xperience.VirtualInbox;
+using Kentico.Xperience.Labs.VirtualInbox;
 
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: RegisterModule(type: typeof(VirtualInboxModule))]
 
-namespace Kentico.Xperience.VirtualInbox;
+namespace Kentico.Xperience.Labs.VirtualInbox;
 
 internal class VirtualInboxModule : Module
 {

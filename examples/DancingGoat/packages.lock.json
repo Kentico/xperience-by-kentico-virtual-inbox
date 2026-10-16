@@ -879,23 +879,23 @@
           "System.IO.Hashing": "8.0.0"
         }
       },
-      "kentico.xperience.virtualinbox": {
+      "kentico.xperience.labs.virtualinbox": {
         "type": "Project",
         "dependencies": {
           "kentico.xperience.core": "[31.2.0, )"
         }
       },
-      "kentico.xperience.virtualinbox.admin": {
+      "kentico.xperience.labs.virtualinbox.admin": {
         "type": "Project",
         "dependencies": {
-          "Kentico.Xperience.VirtualInbox": "[1.4.0, )",
+          "Kentico.Xperience.Labs.VirtualInbox": "[2.0.0, )",
           "kentico.xperience.admin": "[31.2.0, )"
         }
       },
-      "kentico.xperience.virtualinbox.mcp": {
+      "kentico.xperience.labs.virtualinbox.mcp": {
         "type": "Project",
         "dependencies": {
-          "Kentico.Xperience.VirtualInbox": "[1.4.0, )",
+          "Kentico.Xperience.Labs.VirtualInbox": "[2.0.0, )",
           "ModelContextProtocol": "[1.1.0, )",
           "ModelContextProtocol.AspNetCore": "[1.1.0, )"
         }

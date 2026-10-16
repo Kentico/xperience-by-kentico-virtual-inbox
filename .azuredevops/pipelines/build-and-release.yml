@@ -31,7 +31,7 @@ stages:
             value: true
 
           - name: slnPath
-            value: src/Kentico.Xperience.VirtualInbox.Libs.slnx
+            value: src/Kentico.Xperience.Labs.VirtualInbox.Libs.slnx
 
         steps:
           - task: UseDotNet@2
@@ -43,7 +43,7 @@ stages:
             inputs:
               targetType: inline
               script: |
-                $fileContent = Get-Content -Path 'src/Kentico.Xperience.VirtualInbox.Admin/Client/package.json' -Raw
+                $fileContent = Get-Content -Path 'src/Kentico.Xperience.Labs.VirtualInbox.Admin/Client/package.json' -Raw
                 $jsonObject = ConvertFrom-Json -InputObject $fileContent
 
                 # Get the value of engines.node
@@ -96,14 +96,14 @@ stages:
               Configuration: $(Configuration)
               artifacts:
                 - Core:
-                  artifactName: "Kentico-Xperience-VirtualInbox"
-                  projectPath: "src/Kentico.Xperience.VirtualInbox"
+                  artifactName: "Kentico-Xperience-Labs-VirtualInbox"
+                  projectPath: "src/Kentico.Xperience.Labs.VirtualInbox"
                 - Admin:
-                  artifactName: "Kentico-Xperience-VirtualInbox-Admin"
-                  projectPath: "src/Kentico.Xperience.VirtualInbox.Admin"
+                  artifactName: "Kentico-Xperience-Labs-VirtualInbox-Admin"
+                  projectPath: "src/Kentico.Xperience.Labs.VirtualInbox.Admin"
                 - MCP:
-                  artifactName: "Kentico-Xperience-VirtualInbox-MCP"
-                  projectPath: "src/Kentico.Xperience.VirtualInbox.MCP"
+                  artifactName: "Kentico-Xperience-Labs-VirtualInbox-MCP"
+                  projectPath: "src/Kentico.Xperience.Labs.VirtualInbox.MCP"
 
   - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
       - stage: PublishNuGetPackages

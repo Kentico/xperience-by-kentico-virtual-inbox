@@ -2,8 +2,8 @@
   <PropertyGroup>
     <Product>Xperience by Kentico Virtual Inbox Administration module</Product>
     <Title>$(Product)</Title>
-    <PackageId>Kentico.Xperience.VirtualInbox.Admin</PackageId>
-    <Description>DEPRECATED: replaced by Kentico.Xperience.Labs.VirtualInbox.Admin. Adds Administration application UI for Xperience by Kentico Virtual Inbox.</Description>
+    <PackageId>Kentico.Xperience.Labs.VirtualInbox.Admin</PackageId>
+    <Description>Adds Administration application UI for Xperience by Kentico Virtual Inbox.</Description>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,7 +17,7 @@
   <ItemGroup>
     <!-- Requires that npm run build or npm run build:dev was executed _before_ the .NET build -->
     <AdminClientPath Include="Client\dist\**" Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-      <ProjectName>xperience-integrations-virtual-inbox-web-admin</ProjectName>
+      <ProjectName>xperience-labs-virtual-inbox-admin</ProjectName>
     </AdminClientPath>
   </ItemGroup>
 
@@ -35,7 +35,7 @@
 
     <ItemGroup>
       <AdminClientPath Include="Client\dist\**">
-        <ProjectName>xperience-integrations-virtual-inbox-web-admin</ProjectName>
+        <ProjectName>xperience-labs-virtual-inbox-admin</ProjectName>
       </AdminClientPath>
     </ItemGroup>
   </Target>
@@ -49,6 +49,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Kentico.Xperience.VirtualInbox\Kentico.Xperience.VirtualInbox.csproj" />
+    <ProjectReference Include="..\Kentico.Xperience.Labs.VirtualInbox\Kentico.Xperience.Labs.VirtualInbox.csproj" />
   </ItemGroup>
 </Project>

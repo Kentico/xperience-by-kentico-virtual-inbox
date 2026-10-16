@@ -24,7 +24,7 @@
     <PackageReference Include="kentico.xperience.webapp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Kentico.Xperience.VirtualInbox.Admin\Kentico.Xperience.VirtualInbox.Admin.csproj" />
-    <ProjectReference Include="..\..\src\Kentico.Xperience.VirtualInbox.MCP\Kentico.Xperience.VirtualInbox.MCP.csproj" />
+    <ProjectReference Include="..\..\src\Kentico.Xperience.Labs.VirtualInbox.Admin\Kentico.Xperience.Labs.VirtualInbox.Admin.csproj" />
+    <ProjectReference Include="..\..\src\Kentico.Xperience.Labs.VirtualInbox.MCP\Kentico.Xperience.Labs.VirtualInbox.MCP.csproj" />
   </ItemGroup>
 </Project>

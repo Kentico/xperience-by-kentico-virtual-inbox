@@ -49,7 +49,7 @@ To run the Sample app Admin customization in development mode, add the following
 
 ```json
 "CMSAdminClientModuleSettings": {
-  "kentico-xperience-integrations-virtual-inbox-web-admin": {
+  "kentico-xperience-labs-virtual-inbox-admin": {
     "Mode": "Proxy",
     "Port": 3029
   }
@@ -63,7 +63,7 @@ To run the Sample app Admin customization in development mode, add the following
    - `refactor/` - for restructuring of existing features
    - `fix/` - for bugfixes
 
-1. Run `dotnet format` against the `Kentico.Xperience.VirtualInbox` solution
+1. Run `dotnet format` against the `Kentico.Xperience.Labs.VirtualInbox` solution
 
    > use `dotnet: format` VS Code task.
 

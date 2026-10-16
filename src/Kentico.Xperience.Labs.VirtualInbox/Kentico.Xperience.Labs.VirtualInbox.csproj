@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Product>Xperience by Kentico Virtual Inbox</Product>
     <Title>$(Product)</Title>
-    <PackageId>Kentico.Xperience.VirtualInbox</PackageId>
-    <Description>DEPRECATED: replaced by Kentico.Xperience.Labs.VirtualInbox. Adds core object types and services for Xperience by Kentico Virtual Inbox.</Description>
+    <PackageId>Kentico.Xperience.Labs.VirtualInbox</PackageId>
+    <Description>Adds core object types and services for Xperience by Kentico Virtual Inbox.</Description>
   </PropertyGroup>
 
   <ItemGroup>
