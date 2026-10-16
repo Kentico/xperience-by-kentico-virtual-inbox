@@ -38,23 +38,30 @@ SQL Server 2019 or newer compatible database
 
 ### Database Setup
 
-Running the sample project requires creating a new Xperience by Kentico database using the included template.
+The sample project is based on the Xperience by Kentico 31.9.2 Dancing Goat template. Running it requires creating a new Xperience by Kentico database.
 
-Change directory in your console to `./examples/DancingGoat` and follow the instructions in the Xperience
-documentation on [creating a new database](https://docs.xperience.io/xp26/developers-and-admins/installation#Installation-CreatetheprojectdatabaseCreateProjectDatabase).
+Change directory in your console to `./examples/DancingGoat` and follow the Xperience documentation on [creating a new database](https://docs.kentico.com/documentation/developers-and-admins/installation#installation-createprojectdatabase).
+
+The sample stores its database connection string and hash salt in User Secrets. Set both values from the `examples/DancingGoat` directory:
+
+```powershell
+dotnet user-secrets set "ConnectionStrings:CMSConnectionString" "<your database connection string>"
+dotnet user-secrets set "CMSHashStringSalt" "<a unique random value>"
+```
+
+### Local SMTP
+
+The sample routes system emails to Mailpit. Start the local SMTP sink with Docker:
+
+```powershell
+docker run --rm --name dancing-goat-mailpit --detach -p 1025:1025 -p 8025:8025 axllent/mailpit
+```
+
+The sample's `appsettings.Development.json` sends email to `localhost:1025`. View captured messages at <http://localhost:8025>. Stop the container with `docker stop dancing-goat-mailpit`.
 
 ### Admin Customization
 
-To run the Sample app Admin customization in development mode, add the following to your [User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets?view=aspnetcore-10.0&tabs=windows#secret-manager) for the application.
-
-```json
-"CMSAdminClientModuleSettings": {
-  "kentico-xperience-labs-virtual-inbox-admin": {
-    "Mode": "Proxy",
-    "Port": 3029
-  }
-}
-```
+The Virtual Inbox Admin client is configured to run in proxy mode in `appsettings.Development.json` on port `3029`.
 
 ## Development Workflow
 

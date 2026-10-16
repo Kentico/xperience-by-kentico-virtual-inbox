@@ -5,8 +5,8 @@
 > [!NOTE]
 > These packages replace the old `Kentico.Xperience.VirtualInbox`, `Kentico.Xperience.VirtualInbox.Admin`, and `Kentico.Xperience.VirtualInbox.MCP` packages (final version 1.4.0). To migrate, swap the package references for `Kentico.Xperience.Labs.VirtualInbox*` and update `using Kentico.Xperience.VirtualInbox` to `using Kentico.Xperience.Labs.VirtualInbox`.
 
-| Package                              | NuGet                                                                                                                                                                                                   |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Package                                   | NuGet                                                                                                                                                                                                                  |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Kentico.Xperience.Labs.VirtualInbox       | [![Kentico.Xperience.Labs.VirtualInbox - NuGet Package](https://img.shields.io/nuget/v/Kentico.Xperience.Labs.VirtualInbox.svg)](https://www.nuget.org/packages/Kentico.Xperience.Labs.VirtualInbox)                   |
 | Kentico.Xperience.Labs.VirtualInbox.Admin | [![Kentico.Xperience.Labs.VirtualInbox.Admin - NuGet Package](https://img.shields.io/nuget/v/Kentico.Xperience.Labs.VirtualInbox.Admin.svg)](https://www.nuget.org/packages/Kentico.Xperience.Labs.VirtualInbox.Admin) |
 | Kentico.Xperience.Labs.VirtualInbox.MCP   | [![Kentico.Xperience.Labs.VirtualInbox.MCP - NuGet Package](https://img.shields.io/nuget/v/Kentico.Xperience.Labs.VirtualInbox.MCP.svg)](https://www.nuget.org/packages/Kentico.Xperience.Labs.VirtualInbox.MCP)       |
@@ -36,11 +36,12 @@ What are some use cases for this integration?
 
 | Xperience Version | Library Version                                         |
 | ----------------- | ------------------------------------------------------- |
-| >= 31.2.0         | 2.0.0+ (1.0.0 - 1.4.0 under the old `Kentico.Xperience.VirtualInbox*` IDs) |
+| >= 31.9.2         | 2.0.0                                                   |
+| >= 31.2.0         | 1.0.0 - 1.4.0 (final release under the old package IDs) |
 
 ### Dependencies
 
-- [ASP.NET Core 8.0](https://dotnet.microsoft.com/en-us/download)
+- [ASP.NET Core 10.0](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - [Xperience by Kentico](https://docs.kentico.com)
 
 ## Package Installation
@@ -106,11 +107,13 @@ dotnet add package Kentico.Xperience.Labs.VirtualInbox.MCP
 1. Update your `appsettings.Development.json` to enable the library features:
 
    ```json
-    "Kentico": {
-      "VirtualInbox": {
-        "Enabled": true,
-      }
-    },
+   {
+     "Kentico": {
+       "VirtualInbox": {
+         "Enabled": true
+       }
+     }
+   }
    ```
 
 1. Configure your MCP server for your AI enabled development tool
@@ -124,11 +127,13 @@ dotnet add package Kentico.Xperience.Labs.VirtualInbox.MCP
        },
        "your-app": {
          "type": "http",
-         "url": "http://localhost:23146/mcp"
+         "url": "http://localhost:31286/mcp"
        }
      }
    }
    ```
+
+For local system email delivery, configure Xperience system SMTP to point to a local SMTP sink such as Mailpit. The [Usage Guide](./docs/Usage-Guide.md#local-system-email-with-mailpit) includes an example, and the [Contributing Setup](./docs/Contributing-Setup.md#local-smtp) documents the Mailpit Docker command used by the Dancing Goat sample.
 
 > [!WARNING]
 > If used in a production environment, the MCP server exposes customer data without any authentication. The MCP server feature is **intended for development-environments only**.
