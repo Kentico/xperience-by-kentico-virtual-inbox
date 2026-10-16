@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <Target Name="NpmInstall" BeforeTargets="NpmBuildClient" Condition=" '$(Configuration)|$(Platform)' != 'Debug|AnyCPU' ">
-    <Exec Command="npm ci --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)\Client" />
+    <Exec Command="npm ci --include=optional --no-audit --no-fund" WorkingDirectory="$(MSBuildProjectDirectory)\Client" />
   </Target>
   <Target Name="NpmBuildClient" BeforeTargets="BeforeBuild" Condition=" '$(Configuration)|$(Platform)' != 'Debug|AnyCPU' ">
     <Exec Command="npm run build" WorkingDirectory="$(MSBuildProjectDirectory)\Client" />
