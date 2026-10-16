@@ -204,6 +204,21 @@
     color: var(--xp-color-text-muted);
   }
 
+  .xp-select {
+    min-height: 32px;
+    border: 1px solid var(--xp-color-border-strong);
+    border-radius: 6px;
+    background: var(--xp-color-paper);
+    padding: 4px 8px;
+    color: var(--xp-color-text);
+    font-size: 14px;
+  }
+
+  .xp-select:focus-visible {
+    outline: none;
+    box-shadow: var(--xp-focus-default);
+  }
+
   .xp-checkbox {
     display: inline-flex;
     align-items: center;

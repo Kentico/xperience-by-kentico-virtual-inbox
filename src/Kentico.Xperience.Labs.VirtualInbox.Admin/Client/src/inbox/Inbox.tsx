@@ -1,5 +1,6 @@
 import React from 'react';
 import { RefreshCw, Search, Trash2 } from 'lucide-react';
+import { Pagination } from '@kentico/xperience-admin-components';
 import type { VirtualEmailListItemDto } from './types';
 import { Button, Checkbox, Input } from '../ui/xperience';
 import {
@@ -12,8 +13,11 @@ import {
 } from '../ui/table';
 
 interface InboxProps {
-  filteredEmails: VirtualEmailListItemDto[];
+  emails: VirtualEmailListItemDto[];
   totalEmailCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
   selectedEmailGuid: string | null;
   hasAnyEmails: boolean;
   hasSelectedEmails: boolean;
@@ -26,8 +30,13 @@ interface InboxProps {
   OnSearchTermChange: (value: string) => void;
   OnOpenEmail: (messageGuid: string) => void;
   OnDeleteAllOrSelected: () => void;
-  OnToggleEmailSelection: (messageGuid: string, checked: boolean) => void;
+  OnToggleEmailSelection: (
+    email: VirtualEmailListItemDto,
+    checked: boolean,
+  ) => void;
   OnToggleSelectAllFiltered: (checked: boolean) => void;
+  OnPageChange: (pageNumber: number) => void;
+  OnPageSizeChange: (pageSize: number) => void;
 }
 
 export const Inbox = (props: InboxProps) => (
@@ -64,69 +73,107 @@ export const Inbox = (props: InboxProps) => (
         />
       </div>
     </div>
-    <div className="flex-1 min-h-0 overflow-y-auto p-2">
-      <Table className="xp-dataTable table-fixed">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-10">
-              <Checkbox
-                ariaLabel="Select all filtered emails"
-                checked={props.allFilteredSelected}
-                OnChange={props.OnToggleSelectAllFiltered}
-              />
-            </TableHead>
-            <TableHead>Subject</TableHead>
-            <TableHead>From</TableHead>
-            <TableHead className="w-60">To</TableHead>
-            <TableHead>Sent</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {props.filteredEmails.map((message) => (
-            <TableRow
-              key={message.messageGuid}
-              aria-selected={props.selectedEmailGuid === message.messageGuid}
-              className={`cursor-pointer ${props.detailInProgress ? 'opacity-70' : ''}`}
-              data-selected={props.selectedEmailGuid === message.messageGuid}
-              onClick={() => {
-                if (!props.detailInProgress) {
-                  props.OnOpenEmail(message.messageGuid);
-                }
-              }}
-            >
-              <TableCell>
-                <Checkbox
-                  ariaLabel={`Select email ${message.subject || message.messageGuid}`}
-                  checked={props.selectedEmailGuids.includes(
-                    message.messageGuid,
-                  )}
-                  OnChange={(checked) =>
-                    props.OnToggleEmailSelection(message.messageGuid, checked)
-                  }
-                  onClick={(event) => event.stopPropagation()}
-                />
-              </TableCell>
-              <TableCell>{message.subject || '(no subject)'}</TableCell>
-              <TableCell className="xp-muted">{message.sender}</TableCell>
-              <TableCell className="max-w-[18rem] whitespace-normal break-all xp-muted">
-                {message.recipientsTo}
-              </TableCell>
-              <TableCell className="xp-muted">
-                {props.FormatDate(message.sentUtc)}
-              </TableCell>
-            </TableRow>
-          ))}
-          {props.filteredEmails.length === 0 && (
+    <div className="flex-1 min-h-0 flex flex-col p-2">
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <Table className="xp-dataTable table-fixed">
+          <TableHeader>
             <TableRow>
-              <TableCell className="xp-emptyState" colSpan={5}>
-                {props.searchTerm.trim()
-                  ? `No emails match "${props.searchTerm}".`
-                  : 'No emails found.'}
-              </TableCell>
+              <TableHead className="w-10">
+                <Checkbox
+                  ariaLabel="Select all emails on this page"
+                  checked={props.allFilteredSelected}
+                  OnChange={props.OnToggleSelectAllFiltered}
+                />
+              </TableHead>
+              <TableHead>Subject</TableHead>
+              <TableHead>From</TableHead>
+              <TableHead className="w-60">To</TableHead>
+              <TableHead>Sent</TableHead>
             </TableRow>
+          </TableHeader>
+          <TableBody>
+            {props.emails.map((message) => (
+              <TableRow
+                key={message.messageGuid}
+                aria-selected={props.selectedEmailGuid === message.messageGuid}
+                className={`cursor-pointer ${props.detailInProgress ? 'opacity-70' : ''}`}
+                data-selected={props.selectedEmailGuid === message.messageGuid}
+                onClick={() => {
+                  if (!props.detailInProgress) {
+                    props.OnOpenEmail(message.messageGuid);
+                  }
+                }}
+              >
+                <TableCell>
+                  <Checkbox
+                    ariaLabel={`Select email ${message.subject || message.messageGuid}`}
+                    checked={props.selectedEmailGuids.includes(
+                      message.messageGuid,
+                    )}
+                    OnChange={(checked) =>
+                      props.OnToggleEmailSelection(message, checked)
+                    }
+                    onClick={(event) => event.stopPropagation()}
+                  />
+                </TableCell>
+                <TableCell>{message.subject || '(no subject)'}</TableCell>
+                <TableCell className="xp-muted">{message.sender}</TableCell>
+                <TableCell className="max-w-[18rem] whitespace-normal break-all xp-muted">
+                  {message.recipientsTo}
+                </TableCell>
+                <TableCell className="xp-muted">
+                  {props.FormatDate(message.sentUtc)}
+                </TableCell>
+              </TableRow>
+            ))}
+            {props.emails.length === 0 && (
+              <TableRow>
+                <TableCell className="xp-emptyState" colSpan={5}>
+                  {props.searchTerm.trim()
+                    ? `No emails match "${props.searchTerm}".`
+                    : 'No emails found.'}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-between gap-4 border-t p-2">
+        <span className="text-sm xp-muted">
+          {props.totalEmailCount === 0
+            ? '0 emails'
+            : props.pageSize === 0
+              ? `Showing 1-${props.totalEmailCount} of ${props.totalEmailCount}`
+              : `Showing ${(props.pageNumber - 1) * props.pageSize + 1}-${Math.min(
+                  props.pageNumber * props.pageSize,
+                  props.totalEmailCount,
+                )} of ${props.totalEmailCount}`}
+        </span>
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm xp-muted">
+            Emails per page
+            <select
+              aria-label="Emails per page"
+              className="xp-select"
+              onChange={(event) =>
+                props.OnPageSizeChange(Number(event.target.value))
+              }
+              value={props.pageSize}
+            >
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={0}>All</option>
+            </select>
+          </label>
+          {props.totalPages > 1 && (
+            <Pagination
+              onPageChange={props.OnPageChange}
+              selectedPage={props.pageNumber}
+              totalPages={props.totalPages}
+            />
           )}
-        </TableBody>
-      </Table>
+        </div>
+      </div>
     </div>
   </div>
 );
