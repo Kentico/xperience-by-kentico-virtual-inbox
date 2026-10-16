@@ -1,5 +1,5 @@
 {
-  "name": "kentico-xperience-virtual-inbox-web-admin",
+  "name": "kentico-xperience-labs-virtual-inbox-admin",
   "version": "1.0.0",
   "description": "Admin client app for Virtual Inbox.",
   "private": true,

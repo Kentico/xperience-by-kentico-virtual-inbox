@@ -13,7 +13,7 @@ using Microsoft.Extensions.Options;
     parentType: typeof(VirtualInboxApplicationPage),
     slug: "inbox",
     name: "Inbox",
-    templateName: "@kentico/xperience-integrations-virtual-inbox-web-admin/VirtualInbox",
+    templateName: "@kentico/xperience-labs-virtual-inbox-admin/VirtualInbox",
     order: 1,
     Icon = Icons.Message)]
 

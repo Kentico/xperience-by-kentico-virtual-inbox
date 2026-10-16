@@ -8,7 +8,7 @@ module.exports = (opts, argv) => {
       // Sets the organizationName and projectName
       // The JS module is registered on the backend using these values
       orgName: 'kentico',
-      projectName: 'xperience-integrations-virtual-inbox-web-admin',
+      projectName: 'xperience-labs-virtual-inbox-admin',
       webpackConfigEnv: webpackConfigEnv,
       argv: argv,
     });

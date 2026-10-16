@@ -16,6 +16,6 @@ internal class WebAdminModule : AdminModule
     {
         base.OnInit();
 
-        RegisterClientModule("kentico", "xperience-integrations-virtual-inbox-web-admin");
+        RegisterClientModule("kentico", "xperience-labs-virtual-inbox-admin");
     }
 }

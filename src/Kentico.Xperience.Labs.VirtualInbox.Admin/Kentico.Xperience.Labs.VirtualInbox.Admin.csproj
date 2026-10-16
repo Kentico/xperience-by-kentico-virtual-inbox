@@ -17,7 +17,7 @@
   <ItemGroup>
     <!-- Requires that npm run build or npm run build:dev was executed _before_ the .NET build -->
     <AdminClientPath Include="Client\dist\**" Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-      <ProjectName>xperience-integrations-virtual-inbox-web-admin</ProjectName>
+      <ProjectName>xperience-labs-virtual-inbox-admin</ProjectName>
     </AdminClientPath>
   </ItemGroup>
 
@@ -35,7 +35,7 @@
 
     <ItemGroup>
       <AdminClientPath Include="Client\dist\**">
-        <ProjectName>xperience-integrations-virtual-inbox-web-admin</ProjectName>
+        <ProjectName>xperience-labs-virtual-inbox-admin</ProjectName>
       </AdminClientPath>
     </ItemGroup>
   </Target>
