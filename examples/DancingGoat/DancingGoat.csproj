@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework Condition="'$(TargetFramework)' == ''">net10.0</TargetFramework>
     <RootNamespace>DancingGoat</RootNamespace>
-    <UserSecretsId>79c858af-5444-4954-8d08-6592a961e82a</UserSecretsId>
+    <UserSecretsId>3e4a8f71-2c96-4b5d-a103-7f6e9c82d450</UserSecretsId>
     <SeparatedAdmin Condition="'$(SeparatedAdmin)' == ''">false</SeparatedAdmin>
     <NoWarn>$(NoWarn);KXE0004;KXE0006</NoWarn>
   </PropertyGroup>

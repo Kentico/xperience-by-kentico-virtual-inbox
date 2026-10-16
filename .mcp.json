@@ -6,7 +6,16 @@
     },
     "DancingGoat": {
       "type": "http",
-      "url": "http://localhost:23146/mcp"
+      "url": "http://localhost:31286/mcp"
+    },
+    "xperience-management-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@kentico/management-api-mcp@latest"],
+      "env": {
+        "MANAGEMENT_API_URL": "http://localhost:31286/kentico-api/management",
+        "MANAGEMENT_API_SECRET": "mcp_secret_C42D84EA-0860-4AA6-91B2-F00F87A1A99C"
+      }
     },
     "io.github.ChromeDevTools/chrome-devtools-mcp": {
       "type": "stdio",
