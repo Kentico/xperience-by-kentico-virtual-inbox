@@ -135,7 +135,7 @@ In `appsettings.Development.json` (or equivalent environment-specific configurat
        },
        "your-app": {
          "type": "http",
-         "url": "http://localhost:23146/mcp"
+         "url": "http://localhost:31286/mcp"
        }
      }
    }
