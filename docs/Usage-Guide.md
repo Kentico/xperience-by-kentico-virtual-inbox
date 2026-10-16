@@ -5,6 +5,11 @@
 
 This guide explains how to use the Virtual Inbox integration in an ASP.NET Core application, with an emphasis on MCP setup responsibilities.
 
+## Requirements
+
+- .NET 10 / ASP.NET Core 10
+- Xperience by Kentico 31.9.2 or newer
+
 ## Overview
 
 The solution is split into packages with distinct responsibilities:
@@ -135,6 +140,32 @@ In `appsettings.Development.json` (or equivalent environment-specific configurat
      }
    }
    ```
+
+## Local system email with Mailpit
+
+Virtual Inbox captures emails handled by its configured email client. To also inspect system emails (such as password resets and administration notifications), configure Xperience's system SMTP client to send to a local SMTP sink. The Dancing Goat sample uses Mailpit on `localhost:1025`; its setup command and other sample configuration are in the [Contributing Setup](./Contributing-Setup.md#local-smtp).
+
+Register system SMTP options from configuration in `Program.cs`:
+
+```csharp
+builder.Services.ConfigureSystemSmtpOptions(
+    builder.Configuration.GetSection("SystemSmtpOptions"));
+```
+
+Set the Development configuration to the Mailpit SMTP port:
+
+```json
+{
+  "SystemSmtpOptions": {
+    "Server": {
+      "Host": "localhost",
+      "Port": 1025
+    }
+  }
+}
+```
+
+Start Mailpit before running the application. Captured messages are available in its web UI at <http://localhost:8025>. This SMTP configuration is for local development; do not use it as a production mail service.
 
 ## Why this design matters
 
