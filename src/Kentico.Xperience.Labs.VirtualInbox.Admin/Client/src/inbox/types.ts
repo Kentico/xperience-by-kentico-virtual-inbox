@@ -8,6 +8,15 @@ export type VirtualEmailListItemDto = {
   status: string;
 };
 
+export type VirtualEmailPageDto = {
+  items: VirtualEmailListItemDto[];
+  totalCount: number;
+  pageNumber: number;
+  requestedPageNumber: number;
+  pageSize: number;
+  searchTerm: string;
+};
+
 export type VirtualEmailDetailDto = {
   messageGuid: string;
   subject: string;

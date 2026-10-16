@@ -24,6 +24,7 @@ public class VirtualInboxPage(
     IInfoProvider<VirtualEmailInfo> virtualEmailProvider,
     IOptions<VirtualInboxOptions> virtualInboxOptions) : Page<VirtualInboxClientProperties>
 {
+    private const int DEFAULT_EMAILS_PER_PAGE = 50;
     private const string LOAD_EMAILS_COMMAND = "LoadVirtualEmails";
     private const string REFRESH_EMAILS_COMMAND = "RefreshVirtualEmails";
     private const string LOAD_EMAIL_DETAIL_COMMAND = "LoadVirtualEmailDetail";
@@ -38,22 +39,22 @@ public class VirtualInboxPage(
         properties.DeleteEmailCommandName = DELETE_EMAIL_COMMAND;
         properties.DeleteEmailsCommandName = DELETE_EMAILS_COMMAND;
         properties.IsEnabled = virtualInboxOptions.Value.Enabled;
-        properties.Emails = await LoadEmails();
+        properties.Emails = await LoadEmails(new LoadVirtualEmailsCommandParams(1, DEFAULT_EMAILS_PER_PAGE, string.Empty));
 
         return properties;
     }
 
     [PageCommand(CommandName = LOAD_EMAILS_COMMAND, Permission = SystemPermissions.VIEW)]
-    public async Task<ICommandResponse> LoadEmailsCommand() =>
-        ResponseFrom(await LoadEmails());
+    public async Task<ICommandResponse> LoadEmailsCommand(LoadVirtualEmailsCommandParams commandParams) =>
+        ResponseFrom(await LoadEmails(commandParams));
 
     [PageCommand(CommandName = LOAD_EMAIL_DETAIL_COMMAND, Permission = SystemPermissions.VIEW)]
     public async Task<ICommandResponse> LoadEmailDetail(LoadVirtualEmailDetailCommandParams commandParams) =>
         ResponseFrom(await LoadEmailDetail(commandParams.MessageGuid));
 
     [PageCommand(CommandName = REFRESH_EMAILS_COMMAND, Permission = SystemPermissions.VIEW)]
-    public async Task<ICommandResponse> RefreshEmails(RefreshVirtualEmailsCommandParams commandParams) =>
-        ResponseFrom(await LoadEmails(commandParams.LastRetrievedUtc, commandParams.LastRetrievedId));
+    public async Task<ICommandResponse> RefreshEmails(LoadVirtualEmailsCommandParams commandParams) =>
+        ResponseFrom(await LoadEmails(commandParams));
 
     [PageCommand(CommandName = DELETE_EMAIL_COMMAND, Permission = SystemPermissions.UPDATE)]
     public async Task<ICommandResponse> DeleteEmail(DeleteVirtualEmailCommandParams commandParams)
@@ -98,22 +99,30 @@ public class VirtualInboxPage(
         return ResponseFrom(itemCount);
     }
 
-    private async Task<List<VirtualEmailListItemDto>> LoadEmails(DateTime? sinceUtc = null, int? sinceId = null)
+    private async Task<VirtualEmailPageDto> LoadEmails(LoadVirtualEmailsCommandParams commandParams)
     {
-        var query = virtualEmailProvider.Get();
-
-        if (sinceId.HasValue)
+        int pageSize = commandParams.PageSize switch
         {
-            query = query.WhereGreaterThan(nameof(VirtualEmailInfo.VirtualEmailID), sinceId.Value);
-        }
-        else if (sinceUtc.HasValue)
-        {
-            query = query.WhereGreaterOrEquals(nameof(VirtualEmailInfo.VirtualEmailSentUTCDate), sinceUtc.Value);
-        }
+            0 or 50 or 100 => commandParams.PageSize,
+            _ => DEFAULT_EMAILS_PER_PAGE
+        };
+        int pageNumber = Math.Max(commandParams.PageNumber, 1);
+        int requestedPageNumber = pageSize == 0 ? 1 : pageNumber;
+        string searchTerm = commandParams.SearchTerm?.Trim() ?? string.Empty;
 
-        var items = (await query
-            .OrderByDescending(nameof(VirtualEmailInfo.VirtualEmailSentUTCDate))
-            .GetEnumerableTypedResultAsync())
+        int totalCount = await CreateEmailQuery(searchTerm).GetCountAsync();
+        int totalPages = pageSize == 0
+            ? 1
+            : Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
+        pageNumber = Math.Min(pageNumber, totalPages);
+
+        var query = CreateEmailQuery(searchTerm)
+            .OrderBy(
+                $"{nameof(VirtualEmailInfo.VirtualEmailSentUTCDate)} DESC, {nameof(VirtualEmailInfo.VirtualEmailID)} DESC");
+        var results = pageSize == 0
+            ? await query.GetEnumerableTypedResultAsync()
+            : await query.Page(pageNumber - 1, pageSize).GetEnumerableTypedResultAsync();
+        var items = results
             .Select(item => new VirtualEmailListItemDto(
                 item.VirtualEmailID,
                 item.VirtualEmailGUID,
@@ -124,7 +133,32 @@ public class VirtualInboxPage(
                 item.VirtualEmailStatus))
             .ToList();
 
-        return items;
+        return new VirtualEmailPageDto(
+            items,
+            totalCount,
+            pageNumber,
+            requestedPageNumber,
+            pageSize,
+            searchTerm);
+    }
+
+    private ObjectQuery<VirtualEmailInfo> CreateEmailQuery(string searchTerm)
+    {
+        var query = virtualEmailProvider.Get();
+
+        if (searchTerm.Length > 0)
+        {
+            query = query.Where(where => where
+                .WhereContains(nameof(VirtualEmailInfo.VirtualEmailSubject), searchTerm)
+                .Or()
+                .WhereContains(nameof(VirtualEmailInfo.VirtualEmailSender), searchTerm)
+                .Or()
+                .WhereContains(nameof(VirtualEmailInfo.VirtualEmailRecipientsTo), searchTerm)
+                .Or()
+                .WhereContains(nameof(VirtualEmailInfo.VirtualEmailStatus), searchTerm));
+        }
+
+        return query;
     }
 
     private async Task<VirtualEmailDetailDto?> LoadEmailDetail(Guid messageGuid)
@@ -157,7 +191,7 @@ public class VirtualInboxPage(
 public class VirtualInboxClientProperties : TemplateClientProperties
 {
     public bool IsEnabled { get; set; }
-    public IEnumerable<VirtualEmailListItemDto> Emails { get; set; } = [];
+    public VirtualEmailPageDto Emails { get; set; } = new([], 0, 1, 1, 50, string.Empty);
     public string LoadEmailsCommandName { get; set; } = string.Empty;
     public string RefreshEmailsCommandName { get; set; } = string.Empty;
     public string LoadEmailDetailCommandName { get; set; } = string.Empty;
@@ -174,6 +208,14 @@ public record VirtualEmailListItemDto(
     DateTime SentUtc,
     string Status);
 
+public record VirtualEmailPageDto(
+    IReadOnlyCollection<VirtualEmailListItemDto> Items,
+    int TotalCount,
+    int PageNumber,
+    int RequestedPageNumber,
+    int PageSize,
+    string SearchTerm);
+
 public record VirtualEmailDetailDto(
     Guid MessageGuid,
     string Subject,
@@ -186,7 +228,7 @@ public record VirtualEmailDetailDto(
 
 public record LoadVirtualEmailDetailCommandParams(Guid MessageGuid);
 
-public record RefreshVirtualEmailsCommandParams(DateTime? LastRetrievedUtc, int? LastRetrievedId);
+public record LoadVirtualEmailsCommandParams(int PageNumber, int PageSize, string? SearchTerm);
 
 public record DeleteVirtualEmailCommandParams(Guid MessageGuid);
 

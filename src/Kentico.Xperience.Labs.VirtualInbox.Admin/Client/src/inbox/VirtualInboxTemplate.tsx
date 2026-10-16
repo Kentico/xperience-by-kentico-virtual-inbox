@@ -3,16 +3,21 @@ import { Info, RefreshCw } from 'lucide-react';
 import { usePageCommand } from '@kentico/xperience-admin-base';
 import { Inbox } from './Inbox';
 import { Preview } from './Preview';
-import type { VirtualEmailDetailDto, VirtualEmailListItemDto } from './types';
+import type {
+  VirtualEmailDetailDto,
+  VirtualEmailListItemDto,
+  VirtualEmailPageDto,
+} from './types';
 import { Button } from '../ui/xperience';
 
 type LoadVirtualEmailDetailCommandParams = {
   messageGuid: string;
 };
 
-type RefreshVirtualEmailsCommandParams = {
-  lastRetrievedUtc?: string;
-  lastRetrievedId?: number;
+type LoadVirtualEmailsCommandParams = {
+  pageNumber: number;
+  pageSize: number;
+  searchTerm: string;
 };
 
 type DeleteVirtualEmailsCommandParams = {
@@ -21,7 +26,7 @@ type DeleteVirtualEmailsCommandParams = {
 
 interface VirtualEmailInboxClientProperties {
   isEnabled: boolean;
-  emails: VirtualEmailListItemDto[];
+  emails: VirtualEmailPageDto;
   loadEmailsCommandName: string;
   refreshEmailsCommandName: string;
   loadEmailDetailCommandName: string;
@@ -32,51 +37,33 @@ interface VirtualEmailInboxClientProperties {
 export const VirtualInboxTemplate = (
   props: VirtualEmailInboxClientProperties,
 ) => {
-  const getMostRecentSentUtc = (items: VirtualEmailListItemDto[]) => {
-    const newest = items.reduce<Date | null>((latest, item) => {
-      const sent = new Date(item.sentUtc);
-
-      if (Number.isNaN(sent.getTime())) {
-        return latest;
-      }
-
-      if (!latest || sent > latest) {
-        return sent;
-      }
-
-      return latest;
-    }, null);
-
-    return newest?.toISOString();
-  };
-
-  const getMostRecentEmailId = (items: VirtualEmailListItemDto[]) => {
-    const ids = items.map((item) => item.messageId);
-
-    if (ids.length === 0) {
-      return undefined;
-    }
-
-    return Math.max(...ids);
-  };
-
   const hasRefreshCommand =
     typeof props.refreshEmailsCommandName === 'string' &&
     props.refreshEmailsCommandName.length > 0;
 
-  const [emails, setEmails] = useState<VirtualEmailListItemDto[]>(
-    props.emails ?? [],
-  );
+  const [pageData, setPageData] = useState(props.emails);
+  const [currentPage, setCurrentPage] = useState(props.emails.pageNumber);
   const [selectedEmail, setSelectedEmail] =
     useState<VirtualEmailDetailDto | null>(null);
   const [previewTab, setPreviewTab] = useState<'email' | 'metadata'>('email');
   const [searchTerm, setSearchTerm] = useState('');
+  const [pageSize, setPageSize] = useState(props.emails.pageSize);
   const [emailsInProgress, setEmailsInProgress] = useState(false);
   const [detailInProgress, setDetailInProgress] = useState(false);
   const [bulkDeleteInProgress, setBulkDeleteInProgress] = useState(false);
-  const [selectedEmailGuids, setSelectedEmailGuids] = useState<string[]>([]);
+  const [selectedEmails, setSelectedEmails] = useState<
+    VirtualEmailListItemDto[]
+  >([]);
   const [isInfoPopoverOpen, setIsInfoPopoverOpen] = useState(false);
   const infoPopoverRef = useRef<HTMLDivElement | null>(null);
+  const latestRequestRef = useRef({
+    pageNumber: props.emails.pageNumber,
+    pageSize: props.emails.pageSize,
+    searchTerm: props.emails.searchTerm,
+  });
+  const loadRequestIdRef = useRef(0);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectedEmailGuids = selectedEmails.map((email) => email.messageGuid);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -99,8 +86,23 @@ export const VirtualInboxTemplate = (
     return () => {
       document.removeEventListener('mousedown', handlePointerDown);
       document.removeEventListener('keydown', handleEscape);
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
     };
   }, []);
+
+  const applyPageResponse = (response?: VirtualEmailPageDto | null) => {
+    if (
+      response &&
+      response.requestedPageNumber === latestRequestRef.current.pageNumber &&
+      response.pageSize === latestRequestRef.current.pageSize &&
+      response.searchTerm === latestRequestRef.current.searchTerm
+    ) {
+      setPageData(response);
+      setCurrentPage(response.pageNumber);
+    }
+  };
 
   const { execute: loadEmailDetail } = usePageCommand<
     VirtualEmailDetailDto | null,
@@ -111,37 +113,22 @@ export const VirtualInboxTemplate = (
     },
   });
 
-  const { execute: loadEmails } = usePageCommand<VirtualEmailListItemDto[]>(
-    props.loadEmailsCommandName,
-    {
-      after: (response) => {
-        const items = response ?? [];
-        setEmails(items);
-      },
-    },
-  );
+  const { execute: loadEmails } = usePageCommand<
+    VirtualEmailPageDto,
+    LoadVirtualEmailsCommandParams
+  >(props.loadEmailsCommandName, {
+    after: applyPageResponse,
+  });
 
   const { execute: refreshEmails } = usePageCommand<
-    VirtualEmailListItemDto[],
-    RefreshVirtualEmailsCommandParams
+    VirtualEmailPageDto,
+    LoadVirtualEmailsCommandParams
   >(
     hasRefreshCommand
       ? props.refreshEmailsCommandName
-      : props.loadEmailsCommandName,
+      :       props.loadEmailsCommandName,
     {
-      after: (response) => {
-        if (response && response.length > 0) {
-          setEmails((previous) => {
-            const existingGuids = new Set(
-              previous.map((item) => item.messageGuid),
-            );
-            const onlyNew = response.filter(
-              (item) => !existingGuids.has(item.messageGuid),
-            );
-            return [...onlyNew, ...previous];
-          });
-        }
-      },
+      after: applyPageResponse,
     },
   );
 
@@ -151,6 +138,40 @@ export const VirtualInboxTemplate = (
   >(props.deleteEmailsCommandName, {
     after: () => undefined,
   });
+
+  const loadPage = async (
+    pageNumber: number,
+    term: string,
+    refresh = false,
+    requestedPageSize = pageSize,
+  ) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = null;
+    }
+    const normalizedSearchTerm = term.trim();
+    const requestId = ++loadRequestIdRef.current;
+    latestRequestRef.current = {
+      pageNumber,
+      pageSize: requestedPageSize,
+      searchTerm: normalizedSearchTerm,
+    };
+    setCurrentPage(pageNumber);
+    setPageSize(requestedPageSize);
+    setEmailsInProgress(true);
+    try {
+      const command = refresh && hasRefreshCommand ? refreshEmails : loadEmails;
+      await command({
+        pageNumber,
+        pageSize: requestedPageSize,
+        searchTerm: normalizedSearchTerm,
+      });
+    } finally {
+      if (requestId === loadRequestIdRef.current) {
+        setEmailsInProgress(false);
+      }
+    }
+  };
 
   const openEmail = async (
     emailGuid: string,
@@ -166,100 +187,108 @@ export const VirtualInboxTemplate = (
   };
 
   const refreshInbox = async () => {
-    setEmailsInProgress(true);
-    try {
-      if (hasRefreshCommand) {
-        const mostRecentSentUtc = getMostRecentSentUtc(emails);
-        const mostRecentEmailId = getMostRecentEmailId(emails);
-        await refreshEmails({
-          lastRetrievedId: mostRecentEmailId,
-          lastRetrievedUtc: mostRecentSentUtc,
-        });
-      } else {
-        await loadEmails();
-      }
-    } finally {
-      setEmailsInProgress(false);
-    }
+    await loadPage(1, searchTerm, true);
   };
 
   const removeAllOrSelectedEmails = async () => {
     setBulkDeleteInProgress(true);
     try {
-      const selectedEmailIds = emails
-        .filter((item) => selectedEmailGuids.includes(item.messageGuid))
-        .map((item) => item.messageId);
+      const selectedEmailIds = selectedEmails.map((item) => item.messageId);
+      const selectedGuids = new Set(selectedEmailGuids);
 
       await deleteEmails(
         selectedEmailIds.length > 0 ? { messageIds: selectedEmailIds } : {},
       );
 
       if (selectedEmailIds.length > 0) {
-        const selectedSet = new Set(selectedEmailGuids);
-        setEmails((previous) =>
-          previous.filter((item) => !selectedSet.has(item.messageGuid)),
-        );
+        setPageData((previous) => ({
+          ...previous,
+          items: previous.items.filter(
+            (item) => !selectedGuids.has(item.messageGuid),
+          ),
+          totalCount: Math.max(0, previous.totalCount - selectedEmailIds.length),
+        }));
         setSelectedEmail((previous) =>
-          previous && selectedSet.has(previous.messageGuid) ? null : previous,
+          previous && selectedGuids.has(previous.messageGuid) ? null : previous,
         );
+        setSelectedEmails([]);
+        await loadPage(currentPage, searchTerm);
       } else {
-        setEmails([]);
+        setPageData((previous) => ({
+          ...previous,
+          items: [],
+          totalCount: 0,
+          pageNumber: 1,
+        }));
+        setCurrentPage(1);
         setSelectedEmail(null);
+        setSelectedEmails([]);
       }
-
-      setSelectedEmailGuids([]);
     } finally {
       setBulkDeleteInProgress(false);
     }
   };
 
-  const toggleEmailSelection = (emailGuid: string, checked: boolean) => {
+  const toggleEmailSelection = (
+    email: VirtualEmailListItemDto,
+    checked: boolean,
+  ) => {
     if (checked) {
-      setSelectedEmailGuids((previous) => {
-        if (previous.includes(emailGuid)) {
+      setSelectedEmails((previous) => {
+        if (previous.some((item) => item.messageGuid === email.messageGuid)) {
           return previous;
         }
 
-        return [...previous, emailGuid];
+        return [...previous, email];
       });
 
       return;
     }
 
-    setSelectedEmailGuids((previous) =>
-      previous.filter((guid) => guid !== emailGuid),
+    setSelectedEmails((previous) =>
+      previous.filter((item) => item.messageGuid !== email.messageGuid),
     );
   };
 
   const toggleSelectAllFiltered = (checked: boolean) => {
-    const filteredGuids = emails
-      .filter((message) => {
-        const search = searchTerm.trim().toLowerCase();
-
-        if (!search) {
-          return true;
-        }
-
-        return (
-          message.subject.toLowerCase().includes(search) ||
-          message.sender.toLowerCase().includes(search) ||
-          message.recipientsTo.toLowerCase().includes(search) ||
-          message.status.toLowerCase().includes(search)
-        );
-      })
-      .map((item) => item.messageGuid);
-
     if (checked) {
-      setSelectedEmailGuids((previous) =>
-        Array.from(new Set([...previous, ...filteredGuids])),
-      );
+      setSelectedEmails((previous) => {
+        const selectedByGuid = new Map(
+          previous.map((item) => [item.messageGuid, item]),
+        );
+        pageData.items.forEach((item) =>
+          selectedByGuid.set(item.messageGuid, item),
+        );
+        return Array.from(selectedByGuid.values());
+      });
 
       return;
     }
 
-    setSelectedEmailGuids((previous) =>
-      previous.filter((guid) => !filteredGuids.includes(guid)),
+    const pageGuids = new Set(pageData.items.map((item) => item.messageGuid));
+    setSelectedEmails((previous) =>
+      previous.filter((item) => !pageGuids.has(item.messageGuid)),
     );
+  };
+
+  const changeSearchTerm = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+    latestRequestRef.current = {
+      pageNumber: 1,
+      pageSize,
+      searchTerm: value.trim(),
+    };
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      void loadPage(1, value);
+    }, 300);
+  };
+
+  const changePageSize = (value: number) => {
+    void loadPage(1, searchTerm, false, value);
   };
 
   const formatDate = (dateString: string) => {
@@ -279,26 +308,15 @@ export const VirtualInboxTemplate = (
     }).format(date);
   };
 
-  const filteredEmails = emails.filter((email) => {
-    const search = searchTerm.trim().toLowerCase();
-
-    if (!search) {
-      return true;
-    }
-
-    return (
-      email.subject.toLowerCase().includes(search) ||
-      email.sender.toLowerCase().includes(search) ||
-      email.recipientsTo.toLowerCase().includes(search) ||
-      email.status.toLowerCase().includes(search)
-    );
-  });
-
   const allFilteredSelected =
-    filteredEmails.length > 0 &&
-    filteredEmails.every((item) =>
+    pageData.items.length > 0 &&
+    pageData.items.every((item) =>
       selectedEmailGuids.includes(item.messageGuid),
     );
+  const totalPages =
+    pageSize === 0
+      ? 1
+      : Math.max(1, Math.ceil(pageData.totalCount / pageSize));
 
   return (
     <div className="xp-page">
@@ -343,7 +361,7 @@ export const VirtualInboxTemplate = (
             inProgress={emailsInProgress}
             onClick={() => refreshInbox()}
           >
-            {emailsInProgress ? 'Refreshing...' : 'Refresh'}
+            {emailsInProgress ? 'Loading...' : 'Refresh'}
           </Button>
         </div>
 
@@ -363,19 +381,24 @@ export const VirtualInboxTemplate = (
                 FormatDate={formatDate}
                 OnDeleteAllOrSelected={removeAllOrSelectedEmails}
                 OnOpenEmail={openEmail}
-                OnSearchTermChange={setSearchTerm}
+                OnPageChange={(page) => void loadPage(page, searchTerm)}
+                OnPageSizeChange={changePageSize}
+                OnSearchTermChange={changeSearchTerm}
                 OnToggleEmailSelection={toggleEmailSelection}
                 OnToggleSelectAllFiltered={toggleSelectAllFiltered}
                 allFilteredSelected={allFilteredSelected}
                 bulkDeleteInProgress={bulkDeleteInProgress}
                 detailInProgress={detailInProgress}
-                filteredEmails={filteredEmails}
-                hasAnyEmails={emails.length > 0}
+                emails={pageData.items}
+                hasAnyEmails={pageData.totalCount > 0 || !!searchTerm.trim()}
                 hasSelectedEmails={selectedEmailGuids.length > 0}
+                pageNumber={currentPage}
+                pageSize={pageSize}
                 searchTerm={searchTerm}
                 selectedEmailGuids={selectedEmailGuids}
                 selectedEmailGuid={selectedEmail?.messageGuid ?? null}
-                totalEmailCount={emails.length}
+                totalEmailCount={pageData.totalCount}
+                totalPages={totalPages}
               />
             </div>
             <div className="min-h-0">
