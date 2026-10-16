@@ -36,7 +36,8 @@ What are some use cases for this integration?
 
 | Xperience Version | Library Version                                         |
 | ----------------- | ------------------------------------------------------- |
-| >= 31.9.2         | 2.0.0+ (1.0.0 - 1.4.0 under the old `Kentico.Xperience.VirtualInbox*` IDs) |
+| >= 31.9.2         | 2.0.0 (unreleased)                                      |
+| >= 31.2.0         | 1.0.0 - 1.4.0 (final release under the old package IDs) |
 
 ### Dependencies
 
