@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -32,8 +32,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Samples.DancingGoat;
-using Kentico.Xperience.VirtualInbox;
-using Kentico.Xperience.VirtualInbox.MCP;
+using Kentico.Xperience.Labs.VirtualInbox;
+using Kentico.Xperience.Labs.VirtualInbox.MCP;
 using CMS.EmailEngine;
 using ModelContextProtocol.AspNetCore;
 

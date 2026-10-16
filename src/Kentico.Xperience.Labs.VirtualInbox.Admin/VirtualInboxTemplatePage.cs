@@ -3,7 +3,7 @@ using CMS.DataEngine.Query;
 using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
-using Kentico.Xperience.VirtualInbox;
+using Kentico.Xperience.Labs.VirtualInbox;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -17,7 +17,7 @@ using Microsoft.Extensions.Options;
     order: 1,
     Icon = Icons.Message)]
 
-namespace Kentico.Xperience.VirtualInbox;
+namespace Kentico.Xperience.Labs.VirtualInbox;
 
 [UIEvaluatePermission(SystemPermissions.VIEW)]
 public class VirtualInboxPage(

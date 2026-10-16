@@ -2,7 +2,7 @@ using CMS.Membership;
 
 using Kentico.Xperience.Admin.Base;
 using Kentico.Xperience.Admin.Base.UIPages;
-using Kentico.Xperience.VirtualInbox;
+using Kentico.Xperience.Labs.VirtualInbox;
 
 [assembly: UIApplication(
     identifier: VirtualInboxApplicationPage.IDENTIFIER,
@@ -13,7 +13,7 @@ using Kentico.Xperience.VirtualInbox;
     icon: Icons.Message,
     templateName: TemplateNames.SECTION_LAYOUT)]
 
-namespace Kentico.Xperience.VirtualInbox;
+namespace Kentico.Xperience.Labs.VirtualInbox;
 
 [UIPermission(SystemPermissions.VIEW)]
 public class VirtualInboxApplicationPage : ApplicationPage

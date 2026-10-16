@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Product>Xperience by Kentico Virtual Inbox MCP Server</Product>
+    <Title>$(Product)</Title>
+    <PackageId>Kentico.Xperience.Labs.VirtualInbox.MCP</PackageId>
+    <Description>Adds MCP server tools for Xperience by Kentico Virtual Inbox.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kentico.Xperience.Labs.VirtualInbox\Kentico.Xperience.Labs.VirtualInbox.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" />
+  </ItemGroup>
+
+</Project>

@@ -1,7 +1,7 @@
 # Usage Guide
 
-> [!WARNING]
-> **Deprecated package IDs.** Version 1.4.0 is the final release of `Kentico.Xperience.VirtualInbox`, `Kentico.Xperience.VirtualInbox.Admin`, and `Kentico.Xperience.VirtualInbox.MCP`. Future releases ship as `Kentico.Xperience.Labs.VirtualInbox*` packages with new namespaces (`Kentico.Xperience.Labs.VirtualInbox`). Run `dotnet list package --deprecated` to find references to the old packages. See the [GitHub repository](https://github.com/Kentico/xperience-by-kentico-virtual-inbox) for updates.
+> [!NOTE]
+> These packages replace the old `Kentico.Xperience.VirtualInbox`, `Kentico.Xperience.VirtualInbox.Admin`, and `Kentico.Xperience.VirtualInbox.MCP` packages (final version 1.4.0). To migrate, swap the package references for `Kentico.Xperience.Labs.VirtualInbox*` and update `using Kentico.Xperience.VirtualInbox` to `using Kentico.Xperience.Labs.VirtualInbox`.
 
 This guide explains how to use the Virtual Inbox integration in an ASP.NET Core application, with an emphasis on MCP setup responsibilities.
 
@@ -9,9 +9,9 @@ This guide explains how to use the Virtual Inbox integration in an ASP.NET Core 
 
 The solution is split into packages with distinct responsibilities:
 
-- `Kentico.Xperience.VirtualInbox`: core virtual inbox functionality (email capture/storage and related integration services).
-- `Kentico.Xperience.VirtualInbox.Admin`: administration UI.
-- `Kentico.Xperience.VirtualInbox.MCP`: MCP tools for Virtual Inbox data.
+- `Kentico.Xperience.Labs.VirtualInbox`: core virtual inbox functionality (email capture/storage and related integration services).
+- `Kentico.Xperience.Labs.VirtualInbox.Admin`: administration UI.
+- `Kentico.Xperience.Labs.VirtualInbox.MCP`: MCP tools for Virtual Inbox data.
 
 ## MCP responsibility boundary
 
@@ -24,7 +24,7 @@ The host app is responsible for:
 1. Mapping MCP endpoints in the middleware pipeline.
 1. Choosing endpoint path(s), environment conditions, and any access restrictions.
 
-The `Kentico.Xperience.VirtualInbox.MCP` package is responsible only for:
+The `Kentico.Xperience.Labs.VirtualInbox.MCP` package is responsible only for:
 
 - Contributing Virtual Inbox MCP tools to an existing MCP server builder.
 - It does this via `WithVirtualInboxTools(...)`, which internally calls `WithToolsFromAssembly(...)` for the Virtual Inbox MCP assembly.
@@ -34,9 +34,9 @@ In other words, this package does **not** automatically create the MCP server or
 ## Install packages
 
 ```powershell
-dotnet add package Kentico.Xperience.VirtualInbox
-dotnet add package Kentico.Xperience.VirtualInbox.Admin
-dotnet add package Kentico.Xperience.VirtualInbox.MCP
+dotnet add package Kentico.Xperience.Labs.VirtualInbox
+dotnet add package Kentico.Xperience.Labs.VirtualInbox.Admin
+dotnet add package Kentico.Xperience.Labs.VirtualInbox.MCP
 ```
 
 ## Host application setup
@@ -46,8 +46,8 @@ dotnet add package Kentico.Xperience.VirtualInbox.MCP
 In `Program.cs`, add Virtual Inbox services and configure MCP server infrastructure in the host app:
 
 ```csharp
-using Kentico.Xperience.VirtualInbox;
-using Kentico.Xperience.VirtualInbox.MCP;
+using Kentico.Xperience.Labs.VirtualInbox;
+using Kentico.Xperience.Labs.VirtualInbox.MCP;
 using ModelContextProtocol.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);

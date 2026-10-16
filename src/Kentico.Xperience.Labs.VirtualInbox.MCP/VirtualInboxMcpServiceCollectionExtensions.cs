@@ -1,7 +1,7 @@
 
 using System.Text.Json;
 
-using Kentico.Xperience.VirtualInbox.MCP;
+using Kentico.Xperience.Labs.VirtualInbox.MCP;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -14,12 +14,11 @@ public static class VirtualInboxMcpServiceCollectionExtensions
     /// Adds Virtual Inbox MCP tools to an existing MCP server builder.
     /// </summary>
     /// <remarks>
-    /// This extension only registers tools from the <c>Kentico.Xperience.VirtualInbox.MCP</c> assembly.
+    /// This extension only registers tools from the <c>Kentico.Xperience.Labs.VirtualInbox.MCP</c> assembly.
     /// The host application is responsible for MCP transport configuration and endpoint mapping.
     /// </remarks>
     /// <param name="builder">The MCP server builder.</param>
     /// <returns>The MCP server builder for method chaining.</returns>
-    [Obsolete(DeprecationMessages.PackageRenamed, DiagnosticId = DeprecationMessages.DiagnosticId, UrlFormat = DeprecationMessages.Url)]
     public static IMcpServerBuilder WithVirtualInboxTools(this IMcpServerBuilder builder) =>
         builder.WithToolsFromAssembly(typeof(VirtualEmailMcpTools).Assembly);
 
@@ -27,13 +26,12 @@ public static class VirtualInboxMcpServiceCollectionExtensions
     /// Adds Virtual Inbox MCP tools to an existing MCP server builder.
     /// </summary>
     /// <remarks>
-    /// This extension only registers tools from the <c>Kentico.Xperience.VirtualInbox.MCP</c> assembly.
+    /// This extension only registers tools from the <c>Kentico.Xperience.Labs.VirtualInbox.MCP</c> assembly.
     /// The host application is responsible for MCP transport configuration and endpoint mapping.
     /// </remarks>
     /// <param name="builder">The MCP server builder.</param>
     /// <param name="serializerOptions">Custom serialization options for the included tools.</param>
     /// <returns>The MCP server builder for method chaining.</returns>
-    [Obsolete(DeprecationMessages.PackageRenamed, DiagnosticId = DeprecationMessages.DiagnosticId, UrlFormat = DeprecationMessages.Url)]
     public static IMcpServerBuilder WithVirtualInboxTools(this IMcpServerBuilder builder, JsonSerializerOptions serializerOptions) =>
         builder.WithToolsFromAssembly(typeof(VirtualEmailMcpTools).Assembly, serializerOptions);
 }

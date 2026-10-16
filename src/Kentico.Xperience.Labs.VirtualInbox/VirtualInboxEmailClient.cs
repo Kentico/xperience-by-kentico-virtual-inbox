@@ -5,7 +5,7 @@ using CMS.EmailLibrary;
 
 using Microsoft.Extensions.Logging;
 
-namespace Kentico.Xperience.VirtualInbox;
+namespace Kentico.Xperience.Labs.VirtualInbox;
 
 public class VirtualInboxEmailClient(
     IInfoProvider<VirtualEmailInfo> virtualEmailProvider,

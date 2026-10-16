@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Kentico.Xperience.VirtualInbox\Kentico.Xperience.VirtualInbox.csproj" />
+    <ProjectReference Include="..\..\src\Kentico.Xperience.Labs.VirtualInbox\Kentico.Xperience.Labs.VirtualInbox.csproj" />
   </ItemGroup>
 
 </Project>

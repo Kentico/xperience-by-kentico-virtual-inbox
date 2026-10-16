@@ -3,7 +3,7 @@ using CMS.EmailLibrary;
 using CMS.FormEngine;
 using CMS.Modules;
 
-namespace Kentico.Xperience.VirtualInbox;
+namespace Kentico.Xperience.Labs.VirtualInbox;
 
 internal static class VirtualInboxConstants
 {
